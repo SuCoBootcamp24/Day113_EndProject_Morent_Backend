@@ -29,6 +29,10 @@ public class SecurityConfiguration {
 
     private RsaKeyProperties rsaKeys;
 
+    public SecurityConfiguration(RsaKeyProperties rsaKeys) {
+        this.rsaKeys = rsaKeys;
+    }
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
