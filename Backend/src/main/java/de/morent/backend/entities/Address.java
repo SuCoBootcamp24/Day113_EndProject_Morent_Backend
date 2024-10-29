@@ -29,8 +29,6 @@ public class Address {
     @Column
     private String coordinates;
 
-    @OneToOne
-    private Profile profile;
 
 
 }

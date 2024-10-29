@@ -14,7 +14,7 @@ public class Profile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne(mappedBy = "profile")
+    @OneToOne(cascade = {CascadeType.ALL})
     private Address address;
 
     @OneToOne
