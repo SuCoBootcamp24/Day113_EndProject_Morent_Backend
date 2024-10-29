@@ -27,7 +27,6 @@ public class Damage {
     @Column
     private boolean isRepaired;
 
-
     @PrePersist
     public void onCreate(){
         this.created = LocalDate.now();
