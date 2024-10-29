@@ -1,8 +1,10 @@
 package de.morent.backend.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,10 +15,18 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne(cascade = {CascadeType.ALL})
+    @Column(unique = true)
+    private String name;
+
+    @NotBlank
+    @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
-    @OneToMany(mappedBy = "store", cascade = {CascadeType.ALL})
-    private List<VehicleExemplar> vehicleExemplars;
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    private List<VehicleExemplar> vehicleExemplars = new ArrayList<>();
+
+    @NotBlank
+    @OneToOne
+    private User manager;
 
 }

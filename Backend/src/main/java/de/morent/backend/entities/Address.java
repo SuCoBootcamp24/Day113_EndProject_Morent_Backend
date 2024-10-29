@@ -1,6 +1,7 @@
 package de.morent.backend.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -11,22 +12,21 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
+    @NotBlank
     private String street;
 
-    @Column
+    @NotBlank
     private String houseNumber;
 
-    @Column
+    @NotBlank
     private String zipCode;
 
-    @Column
+    @NotBlank
     private String city;
 
-    @Column
+    @NotBlank
     private String country;
 
-    @Column
     private String coordinates;
 
 
