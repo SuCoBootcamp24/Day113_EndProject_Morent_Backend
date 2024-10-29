@@ -1,9 +1,10 @@
-package de.morent.backend.repositories;
+package de.morent.backend.entities;
 
-import de.morent.backend.entities.Profile;
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class Address {
 
     @Id
@@ -28,6 +29,6 @@ public class Address {
     @Column
     private String coordinates;
 
-    @OneToOne
-    private Profile profile;
+
+
 }
