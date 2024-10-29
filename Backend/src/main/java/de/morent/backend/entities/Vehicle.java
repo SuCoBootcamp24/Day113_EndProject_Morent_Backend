@@ -5,6 +5,8 @@ import de.morent.backend.enums.FuelType;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 public class Vehicle {
@@ -41,5 +43,8 @@ public class Vehicle {
 
     @OneToOne(cascade = {CascadeType.ALL})
     private Image image;
+
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.ALL})
+    private List<Review> reviews;
 
 }
