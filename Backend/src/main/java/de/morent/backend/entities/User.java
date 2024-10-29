@@ -40,7 +40,7 @@ public class User implements UserDetails {
     private LocalDateTime updated;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.ALL})
-    private Profil profil;
+    private Profile profile;
 
     @PrePersist
     private void onCreate(){
