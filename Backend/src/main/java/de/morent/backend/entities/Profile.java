@@ -31,4 +31,7 @@ public class Profile {
 
     @Column
     private String phoneNumber;
+
+    @OneToOne(cascade = {CascadeType.ALL})
+    private Image image;
 }

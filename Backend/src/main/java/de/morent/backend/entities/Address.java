@@ -31,4 +31,6 @@ public class Address {
 
     @OneToOne
     private Profile profile;
+
+
 }
