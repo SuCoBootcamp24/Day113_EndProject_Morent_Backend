@@ -62,12 +62,12 @@ class SecurityConfigurationTest {
     @Test
     public void testJwtDecoder() {
         JwtDecoder jwtDecoder = mockSecurityConfiguration.jwtDecoder();
-        assertNotNull(jwtDecoder, "JwtDecoder sollte nicht null sein");
+        assertNotNull(jwtDecoder, "JwtDecoder should not be null");
     }
 
     @Test
     public void testJwtEncoder() {
         JwtEncoder jwtEncoder = mockSecurityConfiguration.jwtEncoder();
-        assertNotNull(jwtEncoder, "JwtEncoder sollte nicht null sein");
+        assertNotNull(jwtEncoder, "JwtEncoder should not be null");
     }
 }

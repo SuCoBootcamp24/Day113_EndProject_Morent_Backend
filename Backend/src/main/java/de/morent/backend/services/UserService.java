@@ -15,24 +15,21 @@ public class UserService {
     private UserRepository userRepository;
     private AuthService authService;
 
-
-
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, AuthService authService) {
         this.userRepository = userRepository;
+        this.authService = authService;
     }
-
-
 
     public Optional<User> findUserById(long userId) {
         return userRepository.findById(userId);
     }
 
-    private Optional<User> getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
     public AuthResponseDTO getTokenByLogin(Authentication auth) {
         Optional<User> existingUser = getUserByEmail(auth.getName());
-        if (existingUser.isEmpty()) throw new UsernameNotFoundException("User " + auth.getName() + "not found");
+        if (existingUser.isEmpty()) throw new UsernameNotFoundException("User " + auth.getName() + " not found");
         String token = authService.getToken(auth);
         return new AuthResponseDTO(token);
     }
