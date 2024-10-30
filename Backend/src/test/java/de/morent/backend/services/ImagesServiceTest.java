@@ -6,26 +6,18 @@ import de.morent.backend.dtos.images.ImgbbThumbDTO;
 import de.morent.backend.entities.Image;
 import de.morent.backend.entities.Vehicle;
 import de.morent.backend.repositories.ImageRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+import org.mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class ImagesServiceTest {
+public class ImagesServiceTest {
 
     @Mock
     private VehicleService vehicleService;
@@ -33,96 +25,139 @@ class ImagesServiceTest {
     @Mock
     private ImageRepository imageRepository;
 
-    @Mock
-    private MultipartFile file;
-
     @InjectMocks
     private ImagesService imagesService;
 
+
+    private Vehicle vehicle;
+    private MultipartFile file;
+    private ResponseEntity<ImgbbDTO> responseEntity;
+    private ImagesService imagesServiceSpy;
+    private ArgumentCaptor<Image> imageCaptor;
+
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(imagesService, "IMGBB_KEY", "test-key");
+        ReflectionTestUtils.setField(imagesService, "IMGBB_URL", "http://test-url.com");
 
-        // Erstelle die Instanz von ImagesService mit den gemockten Abhängigkeiten
-        imagesService = spy(new ImagesService(vehicleService, imageRepository));
+        vehicle = new Vehicle();
+        vehicle.setBrand("TestBrand");
+        vehicle.setModel("TestModel");
 
+        file = mock(MultipartFile.class);
 
-        // Setze die Werte für die @Value-Felder
-        ReflectionTestUtils.setField(imagesService, "IMGBB_KEY", "test_key");
-        ReflectionTestUtils.setField(imagesService, "IMGBB_URL", "http://test.url");
+        ImgbbDataDTO data = new ImgbbDataDTO(
+                "123",
+                "Test Image",
+                "http://viewer-url.com",
+                "http://image-url.com",
+                "http://display-url.com"
+        );
 
-        // Verwende einen Spy, um Methoden zu mocken, ohne die gesamte Klasse zu mocken
-        imagesService = spy(imagesService);
+        ImgbbThumbDTO thumb = new ImgbbThumbDTO("http://thumbnail-url.com");
+        ImgbbDTO imgbbDTO = new ImgbbDTO(data, thumb);
+
+        responseEntity = mock(ResponseEntity.class);
+        when(responseEntity.getBody()).thenReturn(imgbbDTO);
+
+        imagesServiceSpy = spy(imagesService);
+        doReturn(responseEntity).when(imagesServiceSpy)
+                .uploadImageToBudget(any(MultipartFile.class));
+        imageCaptor = ArgumentCaptor.forClass(Image.class);
     }
 
     @Test
-    void testSetImageToVehicle_Success() {
-        long vehicleId = 1L;
-
-        Vehicle vehicle = new Vehicle();
-        vehicle.setBrand("BMW");
-        vehicle.setModel("X5");
+    public void testSetImageToVehicle_Automatic() {
         vehicle.setAutomatic(true);
 
-        // Mock für MultipartFile und Resource
-        MultipartFile file = mock(MultipartFile.class);
-        Resource resource = mock(Resource.class);
-        when(file.getResource()).thenReturn(resource);
+        Image savedImage = new Image();
+        savedImage.setId(1L);
+        savedImage.setImagesName("TestBrand_TestModel_Automatik");
+        savedImage.setImageUrl("http://image-url.com");
+        savedImage.setThumbnailUrl("http://thumbnail-url.com");
 
-        // Erstelle ein Mock-ImgbbDTO
-        ImgbbDataDTO dataDTO = new ImgbbDataDTO("id123", "title", "http://viewer.url", "http://image.url", "http://display.url");
-        ImgbbThumbDTO thumbDTO = new ImgbbThumbDTO("http://thumbnail.url");
-        ImgbbDTO imgbbDTO = new ImgbbDTO(dataDTO, thumbDTO);
+        when(imageRepository.save(imageCaptor.capture())).thenReturn(savedImage);
 
-        // Mock für VehicleService
-        when(vehicleService.findVehicleById(vehicleId)).thenReturn(Optional.of(vehicle));
+        Image result = imagesServiceSpy.setImageToVehicle(vehicle, file);
 
-        // Mock für uploadImageToBudget mit Argumentmatcher
-        doReturn(ResponseEntity.ok(imgbbDTO)).when(imagesService).uploadImageToBudget(any(MultipartFile.class));
+        assertNotNull(result);
+        assertEquals("TestBrand_TestModel_Automatik", result.getImagesName());
+        assertEquals("http://image-url.com", result.getImageUrl());
+        assertEquals("http://thumbnail-url.com", result.getThumbnailUrl());
 
-        boolean result = imagesService.setImageToVehicle(vehicleId, file);
-
-        assertTrue(result);
-        verify(vehicleService).findVehicleById(vehicleId);
-        verify(vehicleService).setNewImageToVehicle(eq(vehicleId), any(Image.class));
+        Image capturedImage = imageCaptor.getValue();
+        assertEquals("TestBrand_TestModel_Automatik", capturedImage.getImagesName());
+        assertEquals("http://image-url.com", capturedImage.getImageUrl());
+        assertEquals("http://thumbnail-url.com", capturedImage.getThumbnailUrl());
     }
 
     @Test
-    void testSetImageToVehicle_VehicleNotFound() {
-        long vehicleId = 1L;
+    public void testSetImageToVehicle_Manual() {
+        vehicle.setAutomatic(false);
 
-        when(vehicleService.findVehicleById(vehicleId)).thenReturn(Optional.empty());
+        Image savedImage = new Image();
+        savedImage.setId(2L);
+        savedImage.setImagesName("TestBrand_TestModel_Schalter");
+        savedImage.setImageUrl("http://image-url.com");
+        savedImage.setThumbnailUrl("http://thumbnail-url.com");
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            imagesService.setImageToVehicle(vehicleId, file);
+        when(imageRepository.save(imageCaptor.capture())).thenReturn(savedImage);
+
+        Image result = imagesServiceSpy.setImageToVehicle(vehicle, file);
+
+        assertNotNull(result);
+        assertEquals("TestBrand_TestModel_Schalter", result.getImagesName());
+        assertEquals("http://image-url.com", result.getImageUrl());
+        assertEquals("http://thumbnail-url.com", result.getThumbnailUrl());
+
+        Image capturedImage = imageCaptor.getValue();
+        assertEquals("TestBrand_TestModel_Schalter", capturedImage.getImagesName());
+        assertEquals("http://image-url.com", capturedImage.getImageUrl());
+        assertEquals("http://thumbnail-url.com", capturedImage.getThumbnailUrl());
+    }
+
+    @Test
+    public void testSetImageToVehicle_NullVehicle() {
+        // Arrange
+        MultipartFile file = mock(MultipartFile.class);
+
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            imagesService.setImageToVehicle(null, file);
         });
 
-        assertEquals("Vehicle with id " + vehicleId + " not found", exception.getMessage());
-        verify(vehicleService).findVehicleById(vehicleId);
-        verify(vehicleService, never()).setNewImageToVehicle(anyLong(), any(Image.class));
+        assertEquals("Vehicle must not be null", exception.getMessage());
     }
 
     @Test
-    void testSetImageToVehicle_UploadFails() {
-        long vehicleId = 1L;
-
-        Vehicle vehicle = new Vehicle();
-        vehicle.setBrand("BMW");
-        vehicle.setModel("X5");
+    public void testSetImageToVehicle_NullFile() {
+        // Arrange
         vehicle.setAutomatic(true);
 
-        // Mock für VehicleService
-        when(vehicleService.findVehicleById(vehicleId)).thenReturn(Optional.of(vehicle));
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            imagesService.setImageToVehicle(vehicle, null);
+        });
 
-        // Mock für uploadImageToBudget, um eine Ausnahme zu werfen
-        doThrow(new RuntimeException("Upload failed")).when(imagesService).uploadImageToBudget(file);
+        assertEquals("File must not be null", exception.getMessage());
+    }
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            imagesService.setImageToVehicle(vehicleId, file);
+    @Test
+    public void testSetImageToVehicle_UploadFailure() {
+        // Arrange
+        vehicle.setAutomatic(true);
+
+        ImagesService imagesServiceSpy = spy(imagesService);
+        doThrow(new RuntimeException("Upload failed")).when(imagesServiceSpy)
+                .uploadImageToBudget(any(MultipartFile.class));
+
+        // Act & Assert
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            imagesServiceSpy.setImageToVehicle(vehicle, file);
         });
 
         assertEquals("Upload failed", exception.getMessage());
-        verify(vehicleService).findVehicleById(vehicleId);
-        verify(vehicleService, never()).setNewImageToVehicle(anyLong(), any(Image.class));
     }
+
 }
