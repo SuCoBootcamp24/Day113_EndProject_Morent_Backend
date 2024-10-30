@@ -14,13 +14,11 @@ public class VehicleService {
 
     private VehicleRepository vehicleRepository;
 
+    private ImagesService imagesService;
+
     public VehicleService(VehicleRepository vehicleRepository) {
         this.vehicleRepository = vehicleRepository;
     }
-
-
-
-
 
     public Optional<Vehicle> findVehicleById(long vehicleId) {
         return vehicleRepository.findById(vehicleId);
@@ -39,11 +37,9 @@ public class VehicleService {
         newVehicle.setConsumption(dto.consumption());
 
         if (!dto.img().isEmpty()) {
-            String imgName = newVehicle.getBrand() + " " + dto.model();
-            if (newVehicle.isAutomatic()) imgName += " Automatik";
-            else imgName += " Schalter";
-            // Upload image and set URL to newVehicle
+            newVehicle.setImage(imagesService.setImageToVehicle(newVehicle, dto.img()));
         }
+
         vehicleRepository.save(newVehicle);
         return true;
     }
