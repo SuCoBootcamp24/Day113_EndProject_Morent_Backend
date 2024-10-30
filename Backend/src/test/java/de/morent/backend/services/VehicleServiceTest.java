@@ -104,10 +104,8 @@ public class VehicleServiceTest {
         when(vehicleRepository.findByBrandAndModelAndIsAutomatic(anyString(), anyString(), anyBoolean()))
                 .thenReturn(Optional.empty());
 
-        // Act
         boolean result = vehicleService.createVehicle(vehicleRequestDTO_NoIMG);
 
-        // Assert
         assertTrue(result);
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
         verify(imagesService, never()).setImageToVehicle(any(Vehicle.class), any());
@@ -121,10 +119,8 @@ public class VehicleServiceTest {
         Image image = new Image();
         when(imagesService.setImageToVehicle(any(Vehicle.class), eq(img))).thenReturn(image);
 
-        // Act
         boolean result = vehicleService.createVehicle(vehicleRequestDTO_IMG);
 
-        // Assert
         assertTrue(result);
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
         verify(imagesService, times(1)).setImageToVehicle(any(Vehicle.class), eq(img));
@@ -135,36 +131,30 @@ public class VehicleServiceTest {
         when(vehicleRepository.findByBrandAndModelAndIsAutomatic(anyString(), anyString(), anyBoolean()))
                 .thenReturn(Optional.of(vehicle));
 
-        // Act & Assert
         assertThrows(EntityExistsException.class, () -> vehicleService.createVehicle(vehicleRequestDTO_NoIMG));
         verify(vehicleRepository, never()).save(any(Vehicle.class));
     }
 
     @Test
     public void testSetNewImageToVehicle_Success() {
-        // Arrange
         long vehicleId = 1L;
         Image image = new Image();
 
         when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
+        when(imagesService.setImageToVehicle(vehicle, img)).thenReturn(image);
 
-        // Act
-        vehicleService.setNewImageToVehicle(vehicleId, image);
+        vehicleService.setNewImageToVehicle(vehicleId, img);
 
-        // Assert
         verify(vehicleRepository, times(1)).save(vehicle);
         assertEquals(image, vehicle.getImage());
     }
 
     @Test
     public void testSetNewImageToVehicle_VehicleNotFound() {
-        // Arrange
         long vehicleId = 1L;
-        Image img = new Image();
 
         when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         Exception exception = assertThrows(RuntimeException.class, () -> vehicleService.setNewImageToVehicle(vehicleId, img));
         assertEquals("VehicleId is failed after Images upload", exception.getMessage());
         verify(vehicleRepository, never()).save(any(Vehicle.class));

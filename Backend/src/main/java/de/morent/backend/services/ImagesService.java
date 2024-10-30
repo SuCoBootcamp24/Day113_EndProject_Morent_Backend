@@ -26,24 +26,12 @@ public class ImagesService {
     private String IMGBB_URL;
 
 
-    private VehicleService vehicleService;
     private ImageRepository imageRepository;
 
-    public ImagesService(VehicleService vehicleService, ImageRepository imageRepository) {
-        this.vehicleService = vehicleService;
+    public ImagesService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
     }
 
-    public boolean upgradeImageFromVehicle(long vehicleId, MultipartFile file) {
-        Optional<Vehicle> existingVehicle = vehicleService.findVehicleById(vehicleId);
-        if (existingVehicle.isEmpty()) throw new EntityNotFoundException("Vehicle not found");
-
-
-        Image img = setImageToVehicle(existingVehicle.get(), file);
-        vehicleService.setNewImageToVehicle(vehicleId, img);
-        return true;
-
-    }
     public Image setImageToVehicle(Vehicle vehicle, MultipartFile file) {
 
         if (vehicle == null) {
@@ -89,6 +77,4 @@ public class ImagesService {
 
         return response;
     }
-
-
 }
