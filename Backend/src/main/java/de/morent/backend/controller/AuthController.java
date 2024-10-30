@@ -27,12 +27,13 @@ public class AuthController {
     //POST / signUp
     @PostMapping("/signUp")
     public ResponseEntity<User> newRegistrationUser(@RequestBody SignUpRequestDto dto) {
-      try{
-          return ResponseEntity.ok(userService.newRegistrationUser(dto));
-      } catch (Exception e) {
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();      }
-    }
+        try {
+            return ResponseEntity.ok(userService.newRegistrationUser(dto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
+    }
 
     //POST / login
     @PostMapping("/login")
