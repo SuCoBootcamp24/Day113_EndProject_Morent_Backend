@@ -1,6 +1,6 @@
 package de.morent.backend.controller;
 
-import de.morent.backend.dtos.store.AuthResponseDTO;
+import de.morent.backend.dtos.auth.AuthResponseDTO;
 import de.morent.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

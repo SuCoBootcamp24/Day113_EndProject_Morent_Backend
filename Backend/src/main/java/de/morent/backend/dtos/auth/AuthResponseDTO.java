@@ -1,4 +1,4 @@
-package de.morent.backend.dtos.store;
+package de.morent.backend.dtos.auth;
 
 public record AuthResponseDTO(
         String token

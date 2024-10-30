@@ -1,6 +1,6 @@
 package de.morent.backend.services;
 
-import de.morent.backend.dtos.store.AuthResponseDTO;
+import de.morent.backend.dtos.auth.AuthResponseDTO;
 import de.morent.backend.entities.User;
 import de.morent.backend.repositories.UserRepository;
 import org.springframework.security.core.Authentication;
