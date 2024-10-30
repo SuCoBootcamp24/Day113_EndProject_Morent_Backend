@@ -16,8 +16,9 @@ public class VehicleService {
 
     private ImagesService imagesService;
 
-    public VehicleService(VehicleRepository vehicleRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService) {
         this.vehicleRepository = vehicleRepository;
+        this.imagesService = imagesService;
     }
 
     public Optional<Vehicle> findVehicleById(long vehicleId) {
@@ -36,7 +37,7 @@ public class VehicleService {
         newVehicle.setAutomatic(dto.isAutomatic());
         newVehicle.setConsumption(dto.consumption());
 
-        if (!dto.img().isEmpty()) {
+        if (dto.img() !=null) {
             newVehicle.setImage(imagesService.setImageToVehicle(newVehicle, dto.img()));
         }
 
