@@ -52,7 +52,7 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("*").permitAll()   // Ohne login erlaubte seiten
+                        .requestMatchers("/api/v1/**").permitAll()   // Ohne login erlaubte seiten
                         //.requestMatchers("*").hasAuthority("SCOPE_XY")  // Nur mit XY rechte erlaubte seiten
                         //.anyRequest().hasAnyAuthority("SCOPE_X", "SCOPE_Y") // nur mit autorisierung erreichbar
                         )

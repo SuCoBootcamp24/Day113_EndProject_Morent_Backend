@@ -20,16 +20,12 @@ public class Profile {
     @OneToOne
     private User user;
 
-    @Column
     private String firstName;
 
-    @Column
     private String lastName;
 
-    @Column
     private LocalDate dateOfBirth;
 
-    @Column
     private String phoneNumber;
 
     @OneToOne(cascade = {CascadeType.ALL})

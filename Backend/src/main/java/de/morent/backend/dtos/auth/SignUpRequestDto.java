@@ -1,6 +1,6 @@
-package de.morent.backend.dtos.store.user;
+package de.morent.backend.dtos.auth;
 
-public record signUpRequestDto(
+public record SignUpRequestDto(
         String email,
         String firstName,
         String lastName,
