@@ -2,6 +2,7 @@ package de.morent.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 
@@ -13,19 +14,14 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
+    private String imagesName;
+
     private String imageUrl;
 
-    @Column
     private String thumbnailUrl;
 
-    @Column
+    @UpdateTimestamp
     private LocalDate uploadDate;
 
-    @PrePersist
-    @PreUpdate
-    private void onUpload(){
-        this.uploadDate = LocalDate.now();
-    }
 
 }
