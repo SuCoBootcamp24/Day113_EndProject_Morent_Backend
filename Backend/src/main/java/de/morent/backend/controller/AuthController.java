@@ -4,6 +4,7 @@ import de.morent.backend.dtos.auth.AuthResponseDTO;
 import de.morent.backend.dtos.auth.SignUpRequestDto;
 import de.morent.backend.entities.User;
 import de.morent.backend.exceptions.UserAlreadyExistsException;
+
 import de.morent.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

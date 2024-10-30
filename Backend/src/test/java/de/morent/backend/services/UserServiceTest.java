@@ -1,6 +1,8 @@
 package de.morent.backend.services;
 
 import de.morent.backend.dtos.auth.AuthResponseDTO;
+import de.morent.backend.entities.Profile;
+
 import de.morent.backend.entities.User;
 import de.morent.backend.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,7 @@ public class UserServiceTest {
     private UserService userService;
 
     private User user;
+    private Profile userProfile;
 
     @BeforeEach
     public void setup() {
@@ -36,6 +39,9 @@ public class UserServiceTest {
         user.setId(1L);
         user.setEmail("test@example.com");
         user.setPassword("password");
+        userProfile = new Profile();
+        userProfile.setFirstName("userFirstName");
+        user.setProfile(new Profile());
     }
 
     @Test
@@ -84,7 +90,7 @@ public class UserServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         String expectedToken = "mocked-token";
-        when(authService.getToken(auth)).thenReturn(expectedToken);
+        when(authService.getToken(auth, user.getProfile().getFirstName())).thenReturn(expectedToken);
 
         AuthResponseDTO result = userService.getTokenByLogin(auth);
 
