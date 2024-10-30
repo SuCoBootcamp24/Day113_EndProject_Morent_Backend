@@ -1,11 +1,16 @@
 package de.morent.backend.controller;
 
 import de.morent.backend.dtos.auth.AuthResponseDTO;
+import de.morent.backend.dtos.auth.SignUpRequestDto;
+import de.morent.backend.entities.User;
+import de.morent.backend.exceptions.UserAlreadyExistsException;
+
 import de.morent.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +26,15 @@ public class AuthController {
 
 
     //POST / signUp
+    @PostMapping("/signUp")
+    public ResponseEntity<User> newRegistrationUser(@RequestBody SignUpRequestDto dto) {
+        try {
+            return ResponseEntity.ok(userService.newRegistrationUser(dto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
-
-
+    }
 
     //POST / login
     @PostMapping("/login")
