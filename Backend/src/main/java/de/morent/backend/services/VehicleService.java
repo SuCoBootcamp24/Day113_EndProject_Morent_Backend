@@ -6,6 +6,7 @@ import de.morent.backend.entities.Vehicle;
 import de.morent.backend.repositories.VehicleRepository;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ public class VehicleService {
     public Optional<Vehicle> findVehicleById(long vehicleId) {
         return vehicleRepository.findById(vehicleId);
     }
+
     public boolean createVehicle(VehicleRequestDTO dto) {
         Optional<Vehicle> existingVehicle = vehicleRepository.findByBrandAndModelAndIsAutomatic(dto.brand(), dto.model(), dto.isAutomatic());
         if (existingVehicle.isPresent()) throw new EntityExistsException("Vehicle already exists");
@@ -40,15 +42,14 @@ public class VehicleService {
         if (dto.img() !=null) {
             newVehicle.setImage(imagesService.setImageToVehicle(newVehicle, dto.img()));
         }
-
         vehicleRepository.save(newVehicle);
         return true;
     }
 
 
-    public void setNewImageToVehicle(long vehicleId, Image img) {
+    public void setNewImageToVehicle(long vehicleId, MultipartFile file) {
         Vehicle vehicle = findVehicleById(vehicleId).orElseThrow(() -> new RuntimeException("VehicleId is failed after Images upload"));
-        vehicle.setImage(img);
+        vehicle.setImage(imagesService.setImageToVehicle(vehicle, file));
         vehicleRepository.save(vehicle);
     }
 }
