@@ -34,12 +34,27 @@ public class ImagesService {
         this.imageRepository = imageRepository;
     }
 
-    public boolean setImageToVehicle(long vehicleId, MultipartFile file) {
+    public boolean upgradeImageFromVehicle(long vehicleId, MultipartFile file) {
         Optional<Vehicle> existingVehicle = vehicleService.findVehicleById(vehicleId);
-        if (existingVehicle.isEmpty()) throw new EntityNotFoundException("Vehicle with id " + vehicleId + " not found");
+        if (existingVehicle.isEmpty()) throw new EntityNotFoundException("Vehicle not found");
 
-        String imgName = existingVehicle.get().getBrand() + "_" + existingVehicle.get().getModel();
-        if (existingVehicle.get().isAutomatic()) imgName += "_Automatik";
+
+        Image img = setImageToVehicle(existingVehicle.get(), file);
+        vehicleService.setNewImageToVehicle(vehicleId, img);
+        return true;
+
+    }
+    public Image setImageToVehicle(Vehicle vehicle, MultipartFile file) {
+
+        if (vehicle == null) {
+            throw new IllegalArgumentException("Vehicle must not be null");
+        }
+        if (file == null) {
+            throw new IllegalArgumentException("File must not be null");
+        }
+
+        String imgName = vehicle.getBrand() + "_" + vehicle.getModel();
+        if (vehicle.isAutomatic()) imgName += "_Automatik";
         else imgName += "_Schalter";
 
         ResponseEntity<ImgbbDTO> response = uploadImageToBudget(file);
@@ -49,8 +64,9 @@ public class ImagesService {
         img.setImageUrl(response.getBody().data().url());
         img.setThumbnailUrl(response.getBody().thumb().thumbnailUrl());
 
-        vehicleService.setNewImageToVehicle(vehicleId, img);
-        return true;
+        img = imageRepository.save(img);
+
+        return img;
     }
 
 
@@ -73,4 +89,6 @@ public class ImagesService {
 
         return response;
     }
+
+
 }

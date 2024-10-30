@@ -1,6 +1,8 @@
 package de.morent.backend.controller;
 
+import de.morent.backend.entities.Image;
 import de.morent.backend.services.ImagesService;
+import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImagesController {
 
     private ImagesService imagesService;
+    private VehicleService vehicleService;
+
+    public ImagesController(ImagesService imagesService, VehicleService vehicleService) {
+        this.imagesService = imagesService;
+        this.vehicleService = vehicleService;
+    }
 
     //POST /user Create/update UserProfile images
     @PostMapping("/user")
@@ -26,7 +34,7 @@ public class ImagesController {
     //POST /vehicle Create/update Vehicle images
     @PostMapping("/vehicle")
     public ResponseEntity<Void> createVehicleImages(@RequestParam long vehicleId, @RequestParam MultipartFile file) {
-        if (imagesService.setImageToVehicle(vehicleId, file)) return ResponseEntity.ok().build();
+        if (imagesService.upgradeImageFromVehicle(vehicleId, file)) return ResponseEntity.ok().build();
         else return ResponseEntity.badRequest().build();
     }
 
