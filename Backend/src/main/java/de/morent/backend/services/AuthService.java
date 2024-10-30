@@ -12,7 +12,7 @@ public class AuthService {
         this.tokenService = tokenService;
     }
 
-    public String getToken(Authentication auth) {
-        return tokenService.generateToken(auth);
+    public String getToken(Authentication auth, String firstname) {
+        return tokenService.generateToken(auth, firstname);
     }
 }

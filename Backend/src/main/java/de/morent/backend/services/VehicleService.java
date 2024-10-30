@@ -14,7 +14,7 @@ public class VehicleService {
     private VehicleRepository vehicleRepository;
 
     public boolean createVehicle(VehicleRequestDTO dto) {
-        Optional<Vehicle> existingVehicle = vehicleRepository.findByBrandAndModelAndAutomatic(dto.brand(), dto.model(), dto.isAutomatic());
+        Optional<Vehicle> existingVehicle = vehicleRepository.findByBrandAndModelAndIsAutomatic(dto.brand(), dto.model(), dto.isAutomatic());
         if (existingVehicle.isPresent()) throw new EntityExistsException("Vehicle already exists");
 
         Vehicle newVehicle = new Vehicle();
