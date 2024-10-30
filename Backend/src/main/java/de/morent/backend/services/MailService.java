@@ -21,11 +21,30 @@ public class MailService {
             message.setSubject("Bitte bestätige deine Registrierung");
             message.setFrom("registration@morent.com");
             String htmlContent = String.format("""
-                    <h1 style=size: 50px; margin-bottom: 32px;">Bestätigungscode</h1>
-                    <p style="margin-bottom: 50px;">Bitte bestätige deine E-Mail-Adresse, um die Registrierung abzuschließen.</p>
-                    <a href="%s" style="background-color: #1985A1; color: #dcdcdd; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-bottom: 50px;">E-Mail bestätigen</a>
-                    <p style="margin-top: 50px;">Vielen Dank, dass du dich bei uns registriert hast!</p>
-                    """, code);
+                            <html>
+        <body>
+            <h1 style="font-size: 24px; color: #333;">Bitte bestätige deine E-Mail-Adresse</h1>
+            <p style="font-size: 16px; color: #555;">
+                Hallo,<br>
+                bitte bestätige deine E-Mail-Adresse, um dein Morent-Kundenkonto aktiv nutzen zu können.
+            </p>
+            <p style="font-size: 20px; font-weight: bold;">
+                Dein Bestätigungscode:<br><br>
+                <span style="font-size: 36px; color: #596780;">%s</span>
+            </p>
+            <p style="font-size: 16px; color: #555;">
+                Bitte kehre zur Seite „E-Mail-Adresse bestätigen“ in deinem Web-Browser zurück und trage dort diesen Code ein.
+            </p>
+            <p style="font-size: 16px; color: #555;">
+                Der Bestätigungscode ist 15 Minuten gültig.
+            </p>
+            <p style="font-size: 16px; color: #555;">
+                Mit freundlichen Grüßen,<br>
+                Dein Morent-Team
+            </p>
+        </body>
+        </html>
+        """, code);
             message.setContent(htmlContent, "text/html; charset=utf-8");
             mailSender.send(message);
         } catch (MessagingException e) {
