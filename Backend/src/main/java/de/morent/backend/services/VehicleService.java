@@ -1,6 +1,7 @@
 package de.morent.backend.services;
 
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
+import de.morent.backend.entities.Image;
 import de.morent.backend.entities.Vehicle;
 import de.morent.backend.repositories.VehicleRepository;
 import jakarta.persistence.EntityExistsException;
@@ -13,6 +14,17 @@ public class VehicleService {
 
     private VehicleRepository vehicleRepository;
 
+    public VehicleService(VehicleRepository vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
+    }
+
+
+
+
+
+    public Optional<Vehicle> findVehicleById(long vehicleId) {
+        return vehicleRepository.findById(vehicleId);
+    }
     public boolean createVehicle(VehicleRequestDTO dto) {
         Optional<Vehicle> existingVehicle = vehicleRepository.findByBrandAndModelAndIsAutomatic(dto.brand(), dto.model(), dto.isAutomatic());
         if (existingVehicle.isPresent()) throw new EntityExistsException("Vehicle already exists");
@@ -34,5 +46,12 @@ public class VehicleService {
         }
         vehicleRepository.save(newVehicle);
         return true;
+    }
+
+
+    public void setNewImageToVehicle(long vehicleId, Image img) {
+        Vehicle vehicle = findVehicleById(vehicleId).orElseThrow(() -> new RuntimeException("VehicleId is failed after Images upload"));
+        vehicle.setImage(img);
+        vehicleRepository.save(vehicle);
     }
 }
