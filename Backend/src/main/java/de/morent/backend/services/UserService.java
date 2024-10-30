@@ -30,7 +30,7 @@ public class UserService {
     public AuthResponseDTO getTokenByLogin(Authentication auth) {
         Optional<User> existingUser = getUserByEmail(auth.getName());
         if (existingUser.isEmpty()) throw new UsernameNotFoundException("User " + auth.getName() + " not found");
-        String token = authService.getToken(auth);
+        String token = authService.getToken(auth, existingUser.get().getProfile().getFirstName());
         return new AuthResponseDTO(token);
     }
 

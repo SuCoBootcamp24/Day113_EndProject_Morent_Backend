@@ -18,6 +18,7 @@ public class AuthServiceTest {
 
     @Mock
     private TokenService tokenService;
+
     @Mock
     private Authentication authentication;
 
@@ -31,21 +32,37 @@ public class AuthServiceTest {
     @Test
     public void testGetToken_Success() {
         String expectedToken = "sampleJwtToken";
-        when(tokenService.generateToken(authentication)).thenReturn(expectedToken);
+        String firstname = "John";
 
-        String actualToken = authService.getToken(authentication);
+        when(tokenService.generateToken(authentication, firstname)).thenReturn(expectedToken);
+
+        String actualToken = authService.getToken(authentication, firstname);
 
         assertEquals(expectedToken, actualToken, "The token generated should match the expected token");
-        verify(tokenService, times(1)).generateToken(authentication);
+        verify(tokenService, times(1)).generateToken(authentication, firstname);
     }
 
     @Test
     public void testGetToken_NullAuthentication() {
-        when(tokenService.generateToken(null)).thenReturn(null);
+        String firstname = "John";
 
-        String actualToken = authService.getToken(null);
+        when(tokenService.generateToken(null, firstname)).thenReturn(null);
+
+        String actualToken = authService.getToken(null, firstname);
 
         assertEquals(null, actualToken, "The token should be null if authentication is null");
-        verify(tokenService, times(1)).generateToken(null);
+        verify(tokenService, times(1)).generateToken(null, firstname);
+    }
+
+    @Test
+    public void testGetToken_NullFirstname() {
+        String expectedToken = "sampleJwtToken";
+
+        when(tokenService.generateToken(authentication, null)).thenReturn(expectedToken);
+
+        String actualToken = authService.getToken(authentication, null);
+
+        assertEquals(expectedToken, actualToken, "The token should be generated even if firstname is null");
+        verify(tokenService, times(1)).generateToken(authentication, null);
     }
 }
