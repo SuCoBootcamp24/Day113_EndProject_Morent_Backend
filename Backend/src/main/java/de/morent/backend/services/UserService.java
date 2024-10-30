@@ -65,7 +65,7 @@ public class UserService {
         return user;
     }
 
-    public String unlockAccount(String verifyCode) {
+    public AuthResponseDTO unlockAccount(String verifyCode) {
         String userEmail = redisService.getValue(verifyCode);
         if (userEmail.isEmpty()) {
             throw new IllegalStateException("Verification code invalid or expired");
@@ -77,7 +77,7 @@ public class UserService {
         String token = tokenService.generateToken(getAuthentication(user), user.getProfile().getFirstName());
 
         userRepository.save(user);
-        return token;
+        return new AuthResponseDTO(token);
     }
 
     public Authentication getAuthentication(User user) {
