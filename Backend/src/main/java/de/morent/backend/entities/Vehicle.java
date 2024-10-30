@@ -16,29 +16,21 @@ public class Vehicle {
     private long id;
 
     @Enumerated(EnumType.STRING)
-    @Column
     private CarType carType;
 
-    @Column
     private String brand;
 
-    @Column
     private String model;
 
-    @Column
     private int seats;
 
-    @Column
     private int engineCapacity;
 
     @Enumerated(EnumType.STRING)
-    @Column
     private FuelType fuelType;
 
-    @Column
     private boolean isAutomatic;
 
-    @Column
     private float consumption;
 
     @OneToOne(cascade = {CascadeType.ALL})
