@@ -77,7 +77,8 @@ public class GeocodingService {
         }
         try {
             double fromAddLat = Double.parseDouble(fromParts[0].trim());
-            double fromAddlon = Double.parseDouble(fromParts[1].trim());
+            double fromAddLon = Double.parseDouble(fromParts[1].trim());
+            return new double[]{fromAddLat, fromAddLon};
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Koordinaten konnten nicht geparst werden.", e);
         }
