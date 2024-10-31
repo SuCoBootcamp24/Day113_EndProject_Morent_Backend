@@ -1,6 +1,7 @@
 package de.morent.backend.services;
 
 import de.morent.backend.dtos.store.StoreRequestDTO;
+import de.morent.backend.dtos.store.StoreShortDTO;
 import de.morent.backend.entities.Address;
 import de.morent.backend.entities.Store;
 import de.morent.backend.entities.User;
@@ -9,6 +10,7 @@ import de.morent.backend.repositories.StoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -50,5 +52,10 @@ public class StoreService {
         storeRepository.save(newStore);
         System.out.println(newStore);
         return true;
+    }
+
+    public List<StoreShortDTO> getStoresCloseByAddress(String address) {
+        //todo
+    return null;
     }
 }
