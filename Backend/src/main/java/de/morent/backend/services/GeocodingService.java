@@ -1,7 +1,6 @@
 package de.morent.backend.services;
 
 import de.morent.backend.entities.Address;
-import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -57,30 +56,31 @@ public class GeocodingService {
     }
 
 
-    public void calcDistance(String fromname, String fromAddress,String toname, String toAddress) {
-        double [] fromcoords = extracted(fromAddress);
+    public void calcDistance(String fromName, String fromAddress,String toName, String toAddress) {
+        if (fromName == null || fromAddress == null || toName == null || toAddress == null) {
+            throw new IllegalArgumentException("All parameters must be provided.");
+        }
 
-        double [] tocoords = extracted(toAddress);
+        if (!redisService.locationExists(fromName))
+            convertStringToLocation(fromName, fromAddress);
+        if (!redisService.locationExists(toName))
+            convertStringToLocation(toName, toAddress);
 
-        redisService.addLocation(fromname, fromcoords[0], fromcoords[1]);
-        redisService.addLocation(toname, tocoords[0], tocoords[1]);
-
-        Double distance = redisService.getDistance(fromname, toname, Metrics.KILOMETERS);
+        Double distance = redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
         System.out.println(distance);
-
     }
 
-    private double [] extracted(String fromAddress) {
-        String[] fromParts = fromAddress.split(",");
-        if (fromParts.length != 2) {
+    private void convertStringToLocation(String name, String address) {
+        String[] parts = address.split(",");
+        if (parts.length != 2) {
             throw new IllegalArgumentException("Invalid coordinate format. Anticipated: 'latitude, longitude'.");
         }
         try {
-            double fromAddLat = Double.parseDouble(fromParts[0].trim());
-            double fromAddLon = Double.parseDouble(fromParts[1].trim());
-            return new double[]{fromAddLat, fromAddLon};
+            double latitude = Double.parseDouble(parts[0].trim());
+            double longitude = Double.parseDouble(parts[1].trim());
+            redisService.addLocation(name, latitude, longitude);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Koordinaten konnten nicht geparst werden.", e);
+            throw new IllegalArgumentException("Coordinates could not be parsed", e);
         }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.GeoOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -48,6 +49,15 @@ public class RedisService {
 
     public boolean hasKey(String key){
         return Boolean.TRUE.equals(longRedisTemplate.hasKey(key));
+    }
+
+
+    //-- GEO ----
+
+    public boolean locationExists(String name) {
+        GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
+        List<Point> positions = geoOps.position(GEO_KEY, name);
+        return positions != null && !positions.isEmpty(); // true, wenn die Location existiert
     }
 
     public void addLocation(String name, double lat, double lon) {
