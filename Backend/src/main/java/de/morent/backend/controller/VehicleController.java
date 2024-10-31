@@ -79,12 +79,11 @@ public class VehicleController {
             @RequestParam long storeId,
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate,
-            @RequestParam(required = false) CarType carType,
-            @RequestParam(required = false) FuelType fuelType,
-            @RequestParam(required = false) BigDecimal price,
-            @RequestParam(required = false) int capacity
+            @RequestParam(required = false) List<CarType> carType,
+            @RequestParam(required = false) List<FuelType> fuelType,
+            @RequestParam(required = false) BigDecimal pricePerDay
             ) {
-        return ResponseEntity.ok(vehicleService.getAllVehicleExemplarInStoreAvailable(storeId, startDate, endDate, carType, fuelType, price, capacity));
+        return ResponseEntity.ok(vehicleService.getFilteredCars(storeId, startDate, endDate, carType, fuelType, pricePerDay));
     }
 
     //GET / one Vehicle-Exemplar

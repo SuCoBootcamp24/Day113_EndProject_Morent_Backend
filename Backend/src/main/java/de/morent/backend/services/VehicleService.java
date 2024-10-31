@@ -11,20 +11,21 @@ import de.morent.backend.mappers.VehicleExemplarMapper;
 import de.morent.backend.mappers.VehicleMapper;
 import de.morent.backend.repositories.VehicleExemplarRepository;
 import de.morent.backend.repositories.VehicleRepository;
+import de.morent.backend.specifications.VehicleSpecification;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
-
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Service
 public class VehicleService {
@@ -164,4 +165,19 @@ public class VehicleService {
                 booking.getPlannedDropOffDate().isAfter(startDate));
     }
 
+    public List<VehicleExemplarDto> getFilteredCars(long storeId, LocalDate startDate, LocalDate endDate, List<CarType> carType, List<FuelType> fuelType, BigDecimal price) {
+        Specification<VehicleExemplar> spec = Specification.where(VehicleSpecification.inStore(storeId));
+
+        if (carType != null && !carType.isEmpty()) {
+            spec = spec.and(VehicleSpecification.isCarType(carType));
+        }
+        if (fuelType != null && !fuelType.isEmpty()) {
+            spec = spec.and(VehicleSpecification.isFuelType(fuelType));
+        }
+        if (price != null) {
+            spec = spec.and(VehicleSpecification.hasMaxPrice(price));
+        }
+
+        return vehicleExemplarRepository.findAll(spec).stream().map(VehicleExemplarMapper::mamToDto).toList();
+    }
 }
