@@ -40,11 +40,12 @@ public class RatingLimitingFilter extends OncePerRequestFilter {
         Long countValue = redisService.getClientRequestCount(clientId);
         if (countValue == null) {
             redisService.saveClientRequestCount(clientId, 1L, TIMEOUT_MINUTES);
-            countValue = 1L;
-        } else {
-            redisService.saveClientRequestCount(clientId, countValue + 1L, TIMEOUT_MINUTES);
+            return false;
         }
-        return redisService.getClientRequestCount(clientId) >= MAX_REQUESTS;
+        
+        redisService.saveClientRequestCount(clientId, countValue + 1L, TIMEOUT_MINUTES);
+
+        return countValue + 1L >= MAX_REQUESTS;
     }
 
 
