@@ -1,6 +1,7 @@
 package de.morent.backend.dtos.store;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record StoreRequestDTO(
 
@@ -17,7 +18,7 @@ public record StoreRequestDTO(
         @NotBlank
         String country,
         String coordinates,
-        @NotBlank
+        @NotNull
         long managerId
 
 ) {
