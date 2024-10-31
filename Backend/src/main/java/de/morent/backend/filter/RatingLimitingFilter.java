@@ -15,7 +15,7 @@ import java.io.IOException;
 @Component
 public class RatingLimitingFilter extends OncePerRequestFilter {
     private final RedisService redisService;
-    private final Integer MAX_REQUESTS = 5;
+    private final Integer MAX_REQUESTS = 500;
     private final long TIMEOUT_MINUTES = 2;
 
     public RatingLimitingFilter(RedisService redisService) {
