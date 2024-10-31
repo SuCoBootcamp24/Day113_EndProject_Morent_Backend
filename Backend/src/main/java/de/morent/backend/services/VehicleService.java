@@ -3,9 +3,9 @@ package de.morent.backend.services;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
-import de.morent.backend.entities.DamageProfile;
-import de.morent.backend.entities.Vehicle;
-import de.morent.backend.entities.VehicleExemplar;
+import de.morent.backend.entities.*;
+import de.morent.backend.enums.CarType;
+import de.morent.backend.enums.FuelType;
 import de.morent.backend.enums.VehicleStatus;
 import de.morent.backend.mappers.VehicleExemplarMapper;
 import de.morent.backend.mappers.VehicleMapper;
@@ -32,11 +32,14 @@ public class VehicleService {
     private VehicleRepository vehicleRepository;
     private VehicleExemplarRepository vehicleExemplarRepository;
     private ImagesService imagesService;
+    private StoreService storeService;
+    private BookingService bookingService;
 
-    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService) {
         this.vehicleRepository = vehicleRepository;
         this.imagesService = imagesService;
         this.vehicleExemplarRepository = vehicleExemplarRepository;
+        this.storeService = storeService;
     }
 
     public VehicleDTO findVehicleById(long vehicleId) {
@@ -134,4 +137,27 @@ public class VehicleService {
         }
         return exemplars.stream().map(VehicleExemplarMapper::mamToDto).toList();
     }
+
+
+    public List<VehicleExemplarDto> getAllVehicleExemplarInStoreAvailable(long storeId, LocalDate startDate, LocalDate endDate, CarType carType, FuelType fuelType, BigDecimal price, int capacity) {
+
+        return vehicleExemplarRepository.findAll().stream().filter(ex ->
+                (
+                        ex.getStore().getId() == storeId) &&
+                        (ex.getVehicle().getCarType() == carType) &&
+                        (ex.getVehicle().getFuelType() == fuelType) &&
+                        (ex.getPricePerDay().compareTo(price) <= 0) &&
+                        (ex.getVehicle().getEngineCapacity() >= capacity) &&
+                        isAvailable(ex, startDate, endDate)
+                )
+                .map(VehicleExemplarMapper::mamToDto).toList();
+    }
+
+    private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
+        List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
+        return bookingHistory.stream().noneMatch(booking ->
+                booking.getPickUpDate().isBefore(endDate) &&
+                booking.getPlannedDropOffDate().isAfter(startDate));
+    }
+
 }

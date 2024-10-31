@@ -3,12 +3,15 @@ package de.morent.backend.controller;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
+import de.morent.backend.enums.CarType;
+import de.morent.backend.enums.FuelType;
 import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -71,7 +74,18 @@ public class VehicleController {
     //-------VehicleExemplar-------------
 
     //GET / Get all Vehicle-Exemplar / Get all Vehicle-Exemplar in one Store
-
+    @GetMapping("/store/filter")
+    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(
+            @RequestParam long storeId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            @RequestParam(required = false) CarType carType,
+            @RequestParam(required = false) FuelType fuelType,
+            @RequestParam(required = false) BigDecimal price,
+            @RequestParam(required = false) int capacity
+            ) {
+        return ResponseEntity.ok(vehicleService.getAllVehicleExemplarInStoreAvailable(storeId, startDate, endDate, carType, fuelType, price, capacity));
+    }
 
     //GET / one Vehicle-Exemplar
 
