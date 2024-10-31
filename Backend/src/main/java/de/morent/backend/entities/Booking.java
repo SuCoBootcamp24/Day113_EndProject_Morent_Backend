@@ -26,7 +26,7 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
-    private VehicleExemplar vehicleExemplarId;
+    private VehicleExemplar vehicleId;
 
     @Column
     private LocalDate pickUpDate;

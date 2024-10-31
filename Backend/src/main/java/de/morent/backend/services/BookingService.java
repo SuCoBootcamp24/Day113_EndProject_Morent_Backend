@@ -18,6 +18,6 @@ public class BookingService {
 
     // Check availability vehicle
     public List<Booking> getAllExemplarBooking (long vehicleExemplarId) {
-        return bookingRepository.findAll().stream().filter(booking-> booking.getVehicleExemplarId().getId() == vehicleExemplarId).toList();
+        return bookingRepository.findAll().stream().filter(booking-> booking.getVehicleId().getId() == vehicleExemplarId).toList();
     }
 }
