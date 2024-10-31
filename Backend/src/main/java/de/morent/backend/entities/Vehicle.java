@@ -34,7 +34,7 @@ public class Vehicle {
     private float consumption;
 
     @OneToOne(cascade = {CascadeType.ALL})
-    private Image image;
+    private Image image = new Image();
 
     @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.ALL})
     private List<Review> reviews;

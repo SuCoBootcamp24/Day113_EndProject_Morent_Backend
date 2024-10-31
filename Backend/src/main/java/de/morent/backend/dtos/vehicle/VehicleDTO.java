@@ -13,7 +13,7 @@ public record VehicleDTO(
         int engineCapacity,
         boolean isAutomatic,
         FuelType fuelType,
-        Image thumbnail,
+        String thumbnailUrl,
         float consumption
 ) {
 }
