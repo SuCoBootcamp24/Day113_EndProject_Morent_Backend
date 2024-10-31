@@ -91,8 +91,8 @@ public class VehicleController {
 
     //POST / Create Vehicle-Exemplar (auto generate)
     @PostMapping("/exemplar")
-    public ResponseEntity<List<VehicleExemplarDto>> createVehicleExemplar(@RequestParam long vehicleId, @RequestParam int quantity, @RequestParam BigDecimal price) {
-        return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, quantity, price));
+    public ResponseEntity<List<VehicleExemplarDto>> createVehicleExemplar(@RequestParam long vehicleId, @RequestParam long storeId, @RequestParam int quantity, @RequestParam BigDecimal price) {
+        return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, storeId, quantity, price));
     }
 
 

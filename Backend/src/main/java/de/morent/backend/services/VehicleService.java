@@ -35,11 +35,13 @@ public class VehicleService {
     private StoreService storeService;
     private BookingService bookingService;
 
-    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService) {
+
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService, BookingService bookingService) {
         this.vehicleRepository = vehicleRepository;
         this.imagesService = imagesService;
         this.vehicleExemplarRepository = vehicleExemplarRepository;
         this.storeService = storeService;
+        this.bookingService = bookingService;
     }
 
     public VehicleDTO findVehicleById(long vehicleId) {
@@ -121,12 +123,14 @@ public class VehicleService {
         vehicleRepository.delete(vehicle);
     }
 
-    public List<VehicleExemplarDto> createVehicleExemplar(long vehicleId, int quantity, BigDecimal price) {
+    public List<VehicleExemplarDto> createVehicleExemplar(long vehicleId, long storeId, int quantity, BigDecimal price) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new EntityNotFoundException("Vehicle with id: " + vehicleId + " not found"));
+        Store store = storeService.findById(storeId);
         List<VehicleExemplar> exemplars = new ArrayList<>();
 
         for (int i = 0; i < quantity; i++) {
             VehicleExemplar vehicleExemplar = new VehicleExemplar();
+            vehicleExemplar.setStore(store);
             vehicleExemplar.setVehicle(vehicle);
             vehicleExemplar.setPricePerDay(price);
             vehicleExemplar.setMileage(0);
