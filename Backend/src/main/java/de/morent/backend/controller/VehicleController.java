@@ -1,6 +1,7 @@
 package de.morent.backend.controller;
 
 import de.morent.backend.dtos.vehicle.VehicleDTO;
+import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
 import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class VehicleController {
 
     //GET / Get all vehicles (PAGES)
     @GetMapping("{pageNo}/{recordCount}")
-    public ResponseEntity<List<VehicleDTO>> getAllVehicles(@PathVariable int pageNo, @PathVariable int recordCount) {
+    public ResponseEntity<List<VehicleDTO>> getAllVehicles(@RequestParam int pageNo, @RequestParam (defaultValue = "10" ) int recordCount) {
         return ResponseEntity.ok(vehicleService.getAllVehicles(pageNo, recordCount));
     }
 
@@ -75,6 +76,10 @@ public class VehicleController {
     //GET / one Vehicle-Exemplar
 
     //POST / Create Vehicle-Exemplar (auto generate)
+    @PostMapping("/exemplar")
+    public ResponseEntity<List<VehicleExemplarDto>> createVehicleExemplar(@RequestParam long vehicleId, @RequestParam int quantity, @RequestParam BigDecimal price) {
+        return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, quantity, price));
+    }
 
 
     //UPDATE

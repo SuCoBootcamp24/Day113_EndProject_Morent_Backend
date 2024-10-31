@@ -1,9 +1,15 @@
 package de.morent.backend.services;
 
 import de.morent.backend.dtos.vehicle.VehicleDTO;
+import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
+import de.morent.backend.entities.DamageProfile;
 import de.morent.backend.entities.Vehicle;
+import de.morent.backend.entities.VehicleExemplar;
+import de.morent.backend.enums.VehicleStatus;
+import de.morent.backend.mappers.VehicleExemplarMapper;
 import de.morent.backend.mappers.VehicleMapper;
+import de.morent.backend.repositories.VehicleExemplarRepository;
 import de.morent.backend.repositories.VehicleRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,12 +30,13 @@ import java.util.stream.Collectors;
 public class VehicleService {
 
     private VehicleRepository vehicleRepository;
-
+    private VehicleExemplarRepository vehicleExemplarRepository;
     private ImagesService imagesService;
 
-    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService) {
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository) {
         this.vehicleRepository = vehicleRepository;
         this.imagesService = imagesService;
+        this.vehicleExemplarRepository = vehicleExemplarRepository;
     }
 
     public VehicleDTO findVehicleById(long vehicleId) {
@@ -69,11 +79,14 @@ public class VehicleService {
         return true;
     }
 
+    // Get All no Pages
 /*    public List<VehicleDTO> getAllVehicles() {
         return vehicleRepository.findAll().stream()
                .map(VehicleMapper::mapToDto)
                .collect(Collectors.toList());
     }*/
+
+    // Get All with Pagination
 
     public List<VehicleDTO> getAllVehicles(int pageNo, int recordCount) {
         Pageable pageable = PageRequest.of(pageNo, recordCount);
@@ -83,8 +96,8 @@ public class VehicleService {
     }
 
 
-    public VehicleDTO updateVehicle(long id, VehicleRequestDTO dto) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("VehicleId is failed after Images upload"));
+    public VehicleDTO updateVehicle(long vehicleId, VehicleRequestDTO dto) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new EntityNotFoundException("Vehicle with id: " + vehicleId + " not found"));
         vehicle.setCarType(dto.carType());
         vehicle.setBrand(dto.brand());
         vehicle.setModel(dto.model());
@@ -105,4 +118,20 @@ public class VehicleService {
         vehicleRepository.delete(vehicle);
     }
 
+    public List<VehicleExemplarDto> createVehicleExemplar(long vehicleId, int quantity, BigDecimal price) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new EntityNotFoundException("Vehicle with id: " + vehicleId + " not found"));
+        List<VehicleExemplar> exemplars = new ArrayList<>();
+
+        for (int i = 0; i < quantity; i++) {
+            VehicleExemplar vehicleExemplar = new VehicleExemplar();
+            vehicleExemplar.setVehicle(vehicle);
+            vehicleExemplar.setPricePerDay(price);
+            vehicleExemplar.setMileage(0);
+            vehicleExemplar.setVehicleStatus(VehicleStatus.EXCELLENT);
+            vehicleExemplar.setDamageProfile(new DamageProfile());
+            exemplars.add(vehicleExemplar);
+            vehicleExemplarRepository.save(vehicleExemplar);
+        }
+        return exemplars.stream().map(VehicleExemplarMapper::mamToDto).toList();
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +17,7 @@ public class DamageProfile {
     private long id;
 
     @OneToMany(mappedBy = "damageProfile")
-    private List<Damage> damages;
+    private List<Damage> damages = new ArrayList<>();
 
     @Column
     private LocalDateTime created;
