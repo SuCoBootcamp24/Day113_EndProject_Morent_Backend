@@ -57,7 +57,6 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         profile.setFirstName(dto.firstName());
         profile.setLastName(dto.lastName());
-        profile.setUser(user);
         user.setRole(UserRole.USER);
         user.setProfile(profile);
         userRepository.save(user);

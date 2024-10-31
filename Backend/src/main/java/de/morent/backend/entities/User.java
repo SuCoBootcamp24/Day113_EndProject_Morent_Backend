@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @Column
     private LocalDateTime updated;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.ALL})
+    @OneToOne(cascade = {CascadeType.ALL})
     private Profile profile;
 
     @PrePersist

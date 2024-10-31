@@ -17,9 +17,6 @@ public class Profile {
     @OneToOne(cascade = {CascadeType.ALL})
     private Address address;
 
-    @OneToOne
-    private User user;
-
     private String firstName;
 
     private String lastName;
