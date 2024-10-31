@@ -16,8 +16,6 @@ public record StoreRequestDTO(
         String city,
         @NotBlank
         String country,
-        String coordinates,
-        @NotBlank
         long managerId
 
 ) {
