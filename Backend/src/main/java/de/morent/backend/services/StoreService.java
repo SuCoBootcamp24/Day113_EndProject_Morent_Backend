@@ -6,6 +6,7 @@ import de.morent.backend.entities.Store;
 import de.morent.backend.entities.User;
 import de.morent.backend.enums.UserRole;
 import de.morent.backend.repositories.StoreRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,5 +51,9 @@ public class StoreService {
         storeRepository.save(newStore);
         System.out.println(newStore);
         return true;
+    }
+
+    public Store findById(long storeId) {
+        return storeRepository.findById(storeId).orElseThrow(() -> new EntityNotFoundException("Store was not found"));
     }
 }
