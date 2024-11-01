@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.converter.VowelConverter;
 import de.morent.backend.dtos.store.StoreRequestDTO;
 import de.morent.backend.dtos.store.StoreShortDTO;
 import de.morent.backend.entities.Address;
@@ -43,11 +44,11 @@ public class StoreService {
         newStore.setName(dto.name());
 
         Address newAddress = new Address();
-        newAddress.setStreet(dto.street());
-        newAddress.setHouseNumber(dto.houseNumber());
-        newAddress.setZipCode(dto.zipCode());
-        newAddress.setCity(dto.city());
-        newAddress.setCountry(dto.country());
+        newAddress.setStreet(VowelConverter.convertString(dto.street()));
+        newAddress.setHouseNumber(VowelConverter.convertString(dto.houseNumber()));
+        newAddress.setZipCode(VowelConverter.convertString(dto.zipCode()));
+        newAddress.setCity(VowelConverter.convertString(dto.city()));
+        newAddress.setCountry(VowelConverter.convertString(dto.country()));
         newAddress.setCoordinates(geocodingService.convertAddToCoords(newAddress));
 
         newStore.setAddress(newAddress);
