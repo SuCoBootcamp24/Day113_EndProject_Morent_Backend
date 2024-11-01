@@ -5,11 +5,13 @@ import de.morent.backend.dtos.store.StoreShortDTO;
 import de.morent.backend.entities.Booking;
 import de.morent.backend.entities.Store;
 import de.morent.backend.services.BookingService;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 
+@Component
 public class StoreMapper {
 
     private BookingService bookingService;
