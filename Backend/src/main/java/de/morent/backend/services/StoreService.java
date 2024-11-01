@@ -18,10 +18,12 @@ public class StoreService {
 
     private StoreRepository storeRepository;
     private UserService userService;
+    private GeocodingService geocodingService;
 
-    public StoreService(StoreRepository storeRepository, UserService userService) {
+    public StoreService(StoreRepository storeRepository, UserService userService, GeocodingService geocodingService) {
         this.storeRepository = storeRepository;
         this.userService = userService;
+        this.geocodingService = geocodingService;
     }
 
     @Transactional
@@ -38,7 +40,7 @@ public class StoreService {
         newAddress.setZipCode(dto.zipCode());
         newAddress.setCity(dto.city());
         newAddress.setCountry(dto.country());
-        newAddress.setCoordinates(dto.coordinates());
+        newAddress.setCoordinates(geocodingService.convertAddToCoords(newAddress));
 
         newStore.setAddress(newAddress);
 
@@ -47,6 +49,7 @@ public class StoreService {
         newStore.setManager(newManager);
 
         storeRepository.save(newStore);
+        System.out.println(newStore);
         return true;
     }
 
