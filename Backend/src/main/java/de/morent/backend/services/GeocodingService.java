@@ -69,6 +69,7 @@ public class GeocodingService {
         if (!redisService.locationExists(toName))
             convertStringToLocation(toName, toAddress);
 
+        System.out.println();
         Double distance = redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
         System.out.println(distance);
         return distance;
@@ -83,8 +84,14 @@ public class GeocodingService {
             double latitude = Double.parseDouble(parts[0].trim());
             double longitude = Double.parseDouble(parts[1].trim());
             redisService.addLocation(name, latitude, longitude);
+            System.out.println("AddLocation:" + " " + name + ", " + latitude + ", " + longitude);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Coordinates could not be parsed", e);
         }
+    }
+
+    public void deleteLocation() {
+        redisService.deleteAllLocations();
+        System.out.println("All locations deleted.");
     }
 }

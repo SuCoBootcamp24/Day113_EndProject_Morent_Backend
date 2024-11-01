@@ -23,4 +23,9 @@ public class GeoController {
         geocodingService.calcDistance(fromName,address1, toName, address2);
         return null;
     }
+
+    @DeleteMapping("/delete")
+    public void deleteLocations() {
+        geocodingService.deleteLocation();
+    }
 }
