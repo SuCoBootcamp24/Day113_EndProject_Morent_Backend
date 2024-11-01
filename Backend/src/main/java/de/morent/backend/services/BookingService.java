@@ -14,11 +14,9 @@ public class BookingService {
 
     private BookingRepository bookingRepository;
 
-    private StoreService storeService;
 
-    public BookingService(BookingRepository bookingRepository, StoreService storeService) {
+    public BookingService(BookingRepository bookingRepository) {
         this.bookingRepository = bookingRepository;
-        this.storeService = storeService;
     }
 
     // Check availability vehicle
