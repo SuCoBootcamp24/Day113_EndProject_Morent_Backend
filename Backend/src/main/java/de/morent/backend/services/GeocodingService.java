@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.converter.VowelConverter;
 import de.morent.backend.entities.Address;
 import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;
@@ -12,14 +13,12 @@ import java.util.Map;
 @Service
 public class GeocodingService {
     private final RestTemplate restTemplate;
-    private RedisService redisService;
+    private final RedisService redisService;
 
     public GeocodingService(RestTemplate restTemplate, RedisService redisService) {
         this.restTemplate = restTemplate;
         this.redisService = redisService;
     }
-
-
 
     public String convertAddToCoords(Address newAddress) {
         String street = newAddress.getStreet().replace(" ", "-");
@@ -27,14 +26,11 @@ public class GeocodingService {
                 + newAddress.getCity() + ","
                 + newAddress.getZipCode() + ","
                 + newAddress.getCountry();
-        System.out.println(address);
         return getCoordinates(address);
     }
 
-
-
-
     public String getCoordinates(String address) {
+        address = VowelConverter.convertString(address);
         if (redisService.hasKey(address)) {
             return redisService.getValue(address);
         }
@@ -45,34 +41,28 @@ public class GeocodingService {
                 .queryParam("addressdetails", "1")
                 .toUriString();
 
-         System.out.println(url);
         List<Map<String, Object>> response = restTemplate.getForObject(url, List.class);
 
-        System.out.println(response);
-
         if (response != null && !response.isEmpty()) {
-            Map<String, Object> location = response.get(0);
-            String coords = location.get("lat") + ", " + location.get("lon");
-            return coords;
+            Map<String, Object> location = response.getFirst();
+            return  location.get("lat") + ", " + location.get("lon");
         }
         return null;
     }
 
-
-    public double calcDistance(String fromName, String fromAddress,String toName, String toAddress) {
+    public double calcDistance(String fromName, String fromAddress, String toName, String toAddress) {
         if (fromName == null || fromAddress == null || toName == null || toAddress == null) {
             throw new IllegalArgumentException("All parameters must be provided.");
         }
+        fromName = VowelConverter.convertStringWithAll(fromName);
+        toName = VowelConverter.convertStringWithAll(toName);
 
         if (!redisService.locationExists(fromName))
             convertStringToLocation(fromName, fromAddress);
         if (!redisService.locationExists(toName))
             convertStringToLocation(toName, toAddress);
 
-        System.out.println();
-        Double distance = redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
-        System.out.println(distance);
-        return distance;
+        return redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
     }
 
     private void convertStringToLocation(String name, String address) {
@@ -84,14 +74,8 @@ public class GeocodingService {
             double latitude = Double.parseDouble(parts[0].trim());
             double longitude = Double.parseDouble(parts[1].trim());
             redisService.addLocation(name, latitude, longitude);
-            System.out.println("AddLocation:" + " " + name + ", " + latitude + ", " + longitude);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Coordinates could not be parsed", e);
         }
-    }
-
-    public void deleteLocation() {
-        redisService.deleteAllLocations();
-        System.out.println("All locations deleted.");
     }
 }

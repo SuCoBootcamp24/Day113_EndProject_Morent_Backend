@@ -5,6 +5,7 @@ import org.springframework.data.geo.Metric;
 import org.springframework.data.geo.Point;
 import org.springframework.data.redis.core.GeoOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,12 @@ public class RedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Long> longRedisTemplate;
+    private final StringRedisTemplate redisStringTemplate;
 
-    public RedisService(RedisTemplate<String, String> redisTemplate, RedisTemplate<String, Long> longRedisTemplate) {
+    public RedisService(RedisTemplate<String, String> redisTemplate, RedisTemplate<String, Long> longRedisTemplate, StringRedisTemplate redisStringTemplate) {
         this.redisTemplate = redisTemplate;
         this.longRedisTemplate = longRedisTemplate;
+        this.redisStringTemplate = redisStringTemplate;
     }
 
     public void saveVerifyCode(String key, String value){
@@ -55,33 +58,19 @@ public class RedisService {
     //-- GEO ----
 
     public boolean locationExists(String name) {
-        GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
+        GeoOperations<String, String> geoOps = redisStringTemplate.opsForGeo();
         List<Point> positions = geoOps.position(GEO_KEY, name);
-        return positions != null && !positions.isEmpty(); // true, wenn die Location existiert
+        return positions != null && !positions.isEmpty() && positions.getFirst() != null;
     }
 
     public void addLocation(String name, double lat, double lon) {
-        GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
+        GeoOperations<String, String> geoOps = redisStringTemplate.opsForGeo();
         geoOps.add(GEO_KEY, new Point(lon, lat), name);
     }
 
     public double getDistance(String location1, String location2, Metric metric) {
-        System.out.println("getDistance" + location1 + ": " + location2);
-
-        GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
-
-
+        GeoOperations<String, String> geoOps = redisStringTemplate.opsForGeo();
         Distance distance = geoOps.distance(GEO_KEY, location1, location2, metric);
-
-        System.out.println("Distance " + distance);
-
         return (distance != null) ? distance.getValue() : 0.0;
     }
-
-
-    public void deleteAllLocations() {
-        redisTemplate.delete(GEO_KEY);
-        System.out.println("Alle Locations wurden aus Redis gelöscht.");
-    }
-
 }

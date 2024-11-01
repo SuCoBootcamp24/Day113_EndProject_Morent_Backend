@@ -15,4 +15,13 @@ public class VowelConverter {
                 .replace("ü", "ue")
                 .replace("ß", "ss");
     }
+
+    public static String removeSpace(String input) {
+        return input.replaceAll("\\s", "_");
+    }
+
+    public static String convertStringWithAll(String input) {
+        input = convertString(input);
+        return removeSpace(input);
+    }
 }
