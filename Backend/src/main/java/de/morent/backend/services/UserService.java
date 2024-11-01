@@ -7,6 +7,7 @@ import de.morent.backend.entities.Profile;
 import de.morent.backend.entities.User;
 import de.morent.backend.enums.UserRole;
 import de.morent.backend.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -85,4 +86,6 @@ public class UserService {
     }
 
 
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not Found"));    }
 }
