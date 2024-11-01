@@ -1,5 +1,8 @@
 package de.morent.backend.services;
 
+import de.morent.backend.dtos.search.AutoCountDto;
+import de.morent.backend.dtos.search.AutoCountRequestDto;
+import de.morent.backend.dtos.search.EnumDto;
 import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
@@ -24,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -180,6 +184,44 @@ public class VehicleService {
     }
 
     public VehicleExemplarDto findVehicleExemplarById(long id) {
-        return null;
+        VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        return VehicleExemplarMapper.mapToDto(exemplar);
+    }
+
+    public AutoCountDto countVehiclesPerType(AutoCountRequestDto dto) {
+        long storeId = dto.storeId();
+
+        // Retrieve a list of available vehicle exemplars for the specified store ID and filter them by availability within the given date range.
+        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> isAvailable(vehicle, dto.startDate(), dto.endDate())).toList();
+
+        // Count the number of vehicle exemplars by fuel type and car type, storing the results in separate maps.
+        Map<FuelType, Long> fuelTypeCounts = availableExemplars.stream().collect(Collectors.groupingBy(vehicle -> vehicle.getVehicle().getFuelType(), Collectors.counting()));
+
+        Map<CarType, Long> carTypeCounts = availableExemplars.stream()
+                .collect(Collectors.groupingBy(vehicle ->
+                                vehicle.getVehicle().getCarType(),
+                        Collectors.counting()));
+
+        // Create a list of EnumDto objects representing car types and their respective counts.
+        List<EnumDto> carTypes = carTypeCounts.entrySet().stream()
+                .map(entry -> new EnumDto(
+                        entry.getKey().getTypeName(),
+                        entry.getKey().name(),
+                        entry.getValue()
+                ))
+                .toList();
+
+        List<EnumDto> fuelTypes = fuelTypeCounts.entrySet().stream()
+                .map(entry -> new EnumDto(
+                        entry.getKey().getTypeName(),
+                        entry.getKey().name(),
+                        entry.getValue()
+                ))
+                .toList();
+
+        return new AutoCountDto(
+            carTypes,
+            fuelTypes
+        );
     }
 }
