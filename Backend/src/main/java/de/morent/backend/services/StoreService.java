@@ -6,13 +6,17 @@ import de.morent.backend.entities.Address;
 import de.morent.backend.entities.Store;
 import de.morent.backend.entities.User;
 import de.morent.backend.enums.UserRole;
+import de.morent.backend.mappers.AddressMapper;
+import de.morent.backend.mappers.StoreMapper;
 import de.morent.backend.repositories.StoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StoreService {
@@ -21,10 +25,13 @@ public class StoreService {
     private UserService userService;
     private GeocodingService geocodingService;
 
-    public StoreService(StoreRepository storeRepository, UserService userService, GeocodingService geocodingService) {
+    private StoreMapper storeMapper;
+
+    public StoreService(StoreRepository storeRepository, UserService userService, GeocodingService geocodingService, StoreMapper storeMapper) {
         this.storeRepository = storeRepository;
         this.userService = userService;
         this.geocodingService = geocodingService;
+        this.storeMapper = storeMapper;
     }
 
     @Transactional
@@ -54,8 +61,55 @@ public class StoreService {
         return true;
     }
 
-    public List<StoreShortDTO> getStoresCloseByAddress(String address) {
-        //todo
-    return null;
+    public List<StoreShortDTO> getStoresCloseByAddress(String city) {
+        List<Store> stores = new ArrayList<>();
+        stores = findStoreByCity(city);
+
+        if (stores != null) return storeMapper.toListStoreShort(stores);
+
+        return getFirstFiveStoresInRange(city);
+
+
+    }
+
+    private List<StoreShortDTO> getFirstFiveStoresInRange(String city) {
+        List<Store> stores;
+        stores = findAllStores();
+        if (stores.isEmpty()) return List.of();
+        return stores.stream()
+                .map(store -> {
+                    String searchLocation = geocodingService.getCoordinates(city);
+                    double distance = geocodingService.calcDistance(
+                            store.getName(),
+                            store.getAddress().getCoordinates(),
+                            city,
+                            searchLocation
+                            );
+
+                    return new StoreShortDTO(
+                            store.getId(),
+                            store.getName(),
+                            AddressMapper.toDTO(store.getAddress()),
+                            distance
+                            );
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<Store> findAllStores() {
+        return storeRepository.findAll();
+    }
+
+    public List<StoreShortDTO> getAllStores() {
+        return storeMapper.toListStoreShort(findAllStores());
+    }
+
+    private List<Store> findStoreByCity(String city) {
+        List<Store> existingStore = storeRepository.findAllByAddress_City(city);
+        return null;
+    }
+
+    public Optional<Store> findStoreById(long storeId) {
+        return storeRepository.findById(storeId);
     }
 }
