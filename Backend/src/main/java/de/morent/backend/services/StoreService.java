@@ -112,6 +112,7 @@ public class StoreService {
 
     public Optional<Store> findStoreById(long storeId) {
         return storeRepository.findById(storeId);
+    }
 
     public Store findById(long storeId) {
         return storeRepository.findById(storeId).orElseThrow(() -> new EntityNotFoundException("Store was not found"));
