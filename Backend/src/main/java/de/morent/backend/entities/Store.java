@@ -25,7 +25,7 @@ public class Store {
     private List<VehicleExemplar> vehicleExemplars = new ArrayList<>();
 
 
-    @OneToOne
+    @ManyToOne
     private User manager;
 
 }
