@@ -35,6 +35,9 @@ public class GeocodingService {
 
 
     public String getCoordinates(String address) {
+        if (redisService.hasKey(address)) {
+            return redisService.getValue(address);
+        }
 
         String url = UriComponentsBuilder.fromHttpUrl("https://nominatim.openstreetmap.org/search")
                 .queryParam("q", address)
@@ -56,7 +59,7 @@ public class GeocodingService {
     }
 
 
-    public void calcDistance(String fromName, String fromAddress,String toName, String toAddress) {
+    public double calcDistance(String fromName, String fromAddress,String toName, String toAddress) {
         if (fromName == null || fromAddress == null || toName == null || toAddress == null) {
             throw new IllegalArgumentException("All parameters must be provided.");
         }
@@ -68,6 +71,7 @@ public class GeocodingService {
 
         Double distance = redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
         System.out.println(distance);
+        return distance;
     }
 
     private void convertStringToLocation(String name, String address) {
