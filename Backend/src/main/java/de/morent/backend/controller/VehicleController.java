@@ -1,5 +1,7 @@
 package de.morent.backend.controller;
 
+import de.morent.backend.dtos.search.AutoCountDto;
+import de.morent.backend.dtos.search.AutoCountRequestDto;
 import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
@@ -95,5 +97,11 @@ public class VehicleController {
     public ResponseEntity<Void> deleteVehicleExemplar(@PathVariable long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Get vehicles count per type
+    @PostMapping("/count")
+    public ResponseEntity<AutoCountDto> countVehiclesPerType(@RequestBody AutoCountRequestDto dto) {
+        return ResponseEntity.ok(vehicleService.countVehiclesPerType(dto));
     }
 }
