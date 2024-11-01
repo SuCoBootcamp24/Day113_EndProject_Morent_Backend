@@ -35,4 +35,11 @@ public class VehicleSpecification {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("store").get("id"), storeId);
     }
+
+    public static Specification<VehicleExemplar> seatsCount(List<Integer> seats) {
+        return (root, query, criteriaBuilder) -> {
+            Join<VehicleExemplar, Vehicle> vehicle = root.join("vehicle");
+            return vehicle.get("seats").in(seats);
+        };
+    }
 }

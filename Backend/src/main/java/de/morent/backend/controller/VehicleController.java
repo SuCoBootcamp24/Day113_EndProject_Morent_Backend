@@ -1,17 +1,14 @@
 package de.morent.backend.controller;
 
+import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
-import de.morent.backend.enums.CarType;
-import de.morent.backend.enums.FuelType;
 import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -47,7 +44,7 @@ public class VehicleController {
     }  */
 
     //GET / Get all vehicles (PAGES)
-    @GetMapping("{pageNo}/{recordCount}")
+    @GetMapping("all")
     public ResponseEntity<List<VehicleDTO>> getAllVehicles(@RequestParam int pageNo, @RequestParam (defaultValue = "10" ) int recordCount) {
         return ResponseEntity.ok(vehicleService.getAllVehicles(pageNo, recordCount));
     }
@@ -74,19 +71,16 @@ public class VehicleController {
     //-------VehicleExemplar-------------
 
     //GET / Get all Vehicle-Exemplar / Get all Vehicle-Exemplar in one Store
-    @GetMapping("/store/filter")
-    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(
-            @RequestParam long storeId,
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate,
-            @RequestParam(required = false) List<CarType> carType,
-            @RequestParam(required = false) List<FuelType> fuelType,
-            @RequestParam(required = false) BigDecimal pricePerDay
-            ) {
-        return ResponseEntity.ok(vehicleService.getFilteredCars(storeId, startDate, endDate, carType, fuelType, pricePerDay));
+    @PostMapping("/exemplars")
+    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(@RequestBody FilteringDto dto, @RequestParam int pageNo, @RequestParam (defaultValue = "10") int recordCount) {
+        return ResponseEntity.ok(vehicleService.getFilteredCars(dto, pageNo, recordCount));
     }
 
     //GET / one Vehicle-Exemplar
+    @GetMapping("/exemplar/{id}")
+    public ResponseEntity<VehicleExemplarDto> getVehicleExemplarById(@PathVariable long id) {
+        return ResponseEntity.ok(vehicleService.findVehicleExemplarById(id));
+    }
 
     //POST / Create Vehicle-Exemplar (auto generate)
     @PostMapping("/exemplar")
@@ -94,8 +88,12 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, storeId, quantity, price));
     }
 
-
     //UPDATE
 
     //DELETE
+    @DeleteMapping("/exemplar/{id}")
+    public ResponseEntity<Void> deleteVehicleExemplar(@PathVariable long id) {
+        vehicleService.deleteVehicle(id);
+        return ResponseEntity.noContent().build();
+    }
 }

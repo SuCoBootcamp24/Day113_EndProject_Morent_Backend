@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
@@ -140,28 +141,45 @@ public class VehicleService {
             exemplars.add(vehicleExemplar);
             vehicleExemplarRepository.save(vehicleExemplar);
         }
-        return exemplars.stream().map(VehicleExemplarMapper::mamToDto).toList();
+        return exemplars.stream().map(VehicleExemplarMapper::mapToDto).toList();
     }
 
-    public List<VehicleExemplarDto> getFilteredCars(long storeId, LocalDate startDate, LocalDate endDate, List<CarType> carType, List<FuelType> fuelType, BigDecimal price) {
+    public List<VehicleExemplarDto> getFilteredCars(FilteringDto dto, int pageNo, int recordCount) {
+        Pageable pageable = PageRequest.of(pageNo, recordCount);
+        long storeId = dto.storeId();
+        List<CarType> carType = dto.carType();
+        List<FuelType> fuelType = dto.fuelType();
+        BigDecimal price = dto.pricePerDay();
+        LocalDate startDate = dto.startDate();
+        LocalDate endDate = dto.endDate();
+        List<Integer> seats = dto.seats();
+
         Specification<VehicleExemplar> spec = Specification.where(VehicleSpecification.inStore(storeId));
-
-        if (carType != null && !carType.isEmpty()) {
+        if (carType != null && !carType.isEmpty())
             spec = spec.and(VehicleSpecification.isCarType(carType));
-        }
-        if (fuelType != null && !fuelType.isEmpty()) {
-            spec = spec.and(VehicleSpecification.isFuelType(fuelType));
-        }
-        if (price != null) {
-            spec = spec.and(VehicleSpecification.hasMaxPrice(price));
-        }
 
-        return vehicleExemplarRepository.findAll(spec).stream().filter(vehicle -> isAvailable(vehicle, startDate, endDate)).map(VehicleExemplarMapper::mamToDto).toList();
+        if (fuelType != null && !fuelType.isEmpty())
+            spec = spec.and(VehicleSpecification.isFuelType(fuelType));
+
+        if (price != null)
+            spec = spec.and(VehicleSpecification.hasMaxPrice(price));
+
+        if (seats != null && !seats.isEmpty())
+            spec = spec.and(VehicleSpecification.seatsCount(seats));
+
+
+        return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> isAvailable(vehicle, startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
     }
+
+
     private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
         List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
         return bookingHistory.stream().noneMatch(booking ->
                 booking.getPickUpDate().isBefore(endDate) &&
                 booking.getPlannedDropOffDate().isAfter(startDate));
+    }
+
+    public VehicleExemplarDto findVehicleExemplarById(long id) {
+        return null;
     }
 }
