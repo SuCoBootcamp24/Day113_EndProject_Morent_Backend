@@ -29,14 +29,19 @@ public class StoreController {
 
     //GET /geosearch
     @GetMapping("/geosearch")
-    public ResponseEntity<List<StoreShortDTO>> getStoresByGeoSearch(String address) {
-       List<StoreShortDTO> stores = storeService.getStoresCloseByAddress(address);
+    public ResponseEntity<List<StoreShortDTO>> getStoresByGeoSearch(String city) {
+       List<StoreShortDTO> stores = storeService.getStoresCloseByAddress(city);
        if (stores.isEmpty()) return ResponseEntity.notFound().build();
        else return ResponseEntity.ok(stores);
     }
 
 
     //GET / Get all stores
+    @GetMapping("/all")
+    public ResponseEntity<List<StoreShortDTO>> getAllStores() {
+        return ResponseEntity.ok(storeService.getAllStores());
+    }
+
 
 
 
