@@ -63,14 +63,12 @@ public class StoreService {
     }
 
     public List<StoreShortDTO> getStoresCloseByAddress(String city) {
-        List<Store> stores = new ArrayList<>();
+        city = VowelConverter.convertString(city);
+        List<Store> stores;
         stores = findStoreByCity(city);
 
         if (stores != null) return storeMapper.toListStoreShort(stores);
-
         return getFirstFiveStoresInRange(city);
-
-
     }
 
     private List<StoreShortDTO> getFirstFiveStoresInRange(String city) {
