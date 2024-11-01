@@ -143,28 +143,6 @@ public class VehicleService {
         return exemplars.stream().map(VehicleExemplarMapper::mamToDto).toList();
     }
 
-
-    public List<VehicleExemplarDto> getAllVehicleExemplarInStoreAvailable(long storeId, LocalDate startDate, LocalDate endDate, CarType carType, FuelType fuelType, BigDecimal price, int capacity) {
-
-        return vehicleExemplarRepository.findAll().stream().filter(ex ->
-                (
-                        ex.getStore().getId() == storeId) &&
-                        (ex.getVehicle().getCarType() == carType) &&
-                        (ex.getVehicle().getFuelType() == fuelType) &&
-                        (ex.getPricePerDay().compareTo(price) <= 0) &&
-                        (ex.getVehicle().getEngineCapacity() >= capacity) &&
-                        isAvailable(ex, startDate, endDate)
-                )
-                .map(VehicleExemplarMapper::mamToDto).toList();
-    }
-
-    private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
-        List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
-        return bookingHistory.stream().noneMatch(booking ->
-                booking.getPickUpDate().isBefore(endDate) &&
-                booking.getPlannedDropOffDate().isAfter(startDate));
-    }
-
     public List<VehicleExemplarDto> getFilteredCars(long storeId, LocalDate startDate, LocalDate endDate, List<CarType> carType, List<FuelType> fuelType, BigDecimal price) {
         Specification<VehicleExemplar> spec = Specification.where(VehicleSpecification.inStore(storeId));
 
@@ -178,6 +156,12 @@ public class VehicleService {
             spec = spec.and(VehicleSpecification.hasMaxPrice(price));
         }
 
-        return vehicleExemplarRepository.findAll(spec).stream().map(VehicleExemplarMapper::mamToDto).toList();
+        return vehicleExemplarRepository.findAll(spec).stream().filter(vehicle -> isAvailable(vehicle, startDate, endDate)).map(VehicleExemplarMapper::mamToDto).toList();
+    }
+    private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
+        List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
+        return bookingHistory.stream().noneMatch(booking ->
+                booking.getPickUpDate().isBefore(endDate) &&
+                booking.getPlannedDropOffDate().isAfter(startDate));
     }
 }
