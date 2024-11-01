@@ -67,7 +67,7 @@ public class StoreService {
         List<Store> stores;
         stores = findStoreByCity(city);
 
-        if (stores != null) return storeMapper.toListStoreShort(stores);
+        if (!stores.isEmpty()) return storeMapper.toListStoreShort(stores);
         return getFirstFiveStoresInRange(city);
     }
 
@@ -104,8 +104,10 @@ public class StoreService {
     }
 
     private List<Store> findStoreByCity(String city) {
+        System.out.println("######CITY: " + city);
         List<Store> existingStore = storeRepository.findAllByAddress_City(city);
-        return null;
+        if (existingStore!= null) return existingStore;
+        return List.of();
     }
 
     public Optional<Store> findStoreById(long storeId) {

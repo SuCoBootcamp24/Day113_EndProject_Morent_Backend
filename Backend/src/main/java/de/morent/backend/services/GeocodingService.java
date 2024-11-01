@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.converter.VowelConverter;
 import de.morent.backend.entities.Address;
 import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class GeocodingService {
 
 
     public String getCoordinates(String address) {
+        address = VowelConverter.convertString(address);
         if (redisService.hasKey(address)) {
             return redisService.getValue(address);
         }
