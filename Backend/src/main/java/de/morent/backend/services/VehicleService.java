@@ -1,5 +1,9 @@
 package de.morent.backend.services;
 
+import de.morent.backend.dtos.search.AutoCountDto;
+import de.morent.backend.dtos.search.AutoCountRequestDto;
+import de.morent.backend.dtos.search.EnumDto;
+import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
@@ -11,20 +15,22 @@ import de.morent.backend.mappers.VehicleExemplarMapper;
 import de.morent.backend.mappers.VehicleMapper;
 import de.morent.backend.repositories.VehicleExemplarRepository;
 import de.morent.backend.repositories.VehicleRepository;
+import de.morent.backend.specifications.VehicleSpecification;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
-
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Service
 public class VehicleService {
@@ -35,11 +41,13 @@ public class VehicleService {
     private StoreService storeService;
     private BookingService bookingService;
 
-    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService) {
+
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService, BookingService bookingService) {
         this.vehicleRepository = vehicleRepository;
         this.imagesService = imagesService;
         this.vehicleExemplarRepository = vehicleExemplarRepository;
         this.storeService = storeService;
+        this.bookingService = bookingService;
     }
 
     public VehicleDTO findVehicleById(long vehicleId) {
@@ -121,12 +129,14 @@ public class VehicleService {
         vehicleRepository.delete(vehicle);
     }
 
-    public List<VehicleExemplarDto> createVehicleExemplar(long vehicleId, int quantity, BigDecimal price) {
+    public List<VehicleExemplarDto> createVehicleExemplar(long vehicleId, long storeId, int quantity, BigDecimal price) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new EntityNotFoundException("Vehicle with id: " + vehicleId + " not found"));
+        Store store = storeService.findById(storeId);
         List<VehicleExemplar> exemplars = new ArrayList<>();
 
         for (int i = 0; i < quantity; i++) {
             VehicleExemplar vehicleExemplar = new VehicleExemplar();
+            vehicleExemplar.setStore(store);
             vehicleExemplar.setVehicle(vehicle);
             vehicleExemplar.setPricePerDay(price);
             vehicleExemplar.setMileage(0);
@@ -135,23 +145,36 @@ public class VehicleService {
             exemplars.add(vehicleExemplar);
             vehicleExemplarRepository.save(vehicleExemplar);
         }
-        return exemplars.stream().map(VehicleExemplarMapper::mamToDto).toList();
+        return exemplars.stream().map(VehicleExemplarMapper::mapToDto).toList();
     }
 
+    public List<VehicleExemplarDto> getFilteredCars(FilteringDto dto, int pageNo, int recordCount) {
+        Pageable pageable = PageRequest.of(pageNo, recordCount);
+        long storeId = dto.storeId();
+        List<CarType> carType = dto.carType();
+        List<FuelType> fuelType = dto.fuelType();
+        BigDecimal price = dto.pricePerDay();
+        LocalDate startDate = dto.startDate();
+        LocalDate endDate = dto.endDate();
+        List<Integer> seats = dto.seats();
 
-    public List<VehicleExemplarDto> getAllVehicleExemplarInStoreAvailable(long storeId, LocalDate startDate, LocalDate endDate, CarType carType, FuelType fuelType, BigDecimal price, int capacity) {
+        Specification<VehicleExemplar> spec = Specification.where(VehicleSpecification.inStore(storeId));
+        if (carType != null && !carType.isEmpty())
+            spec = spec.and(VehicleSpecification.isCarType(carType));
 
-        return vehicleExemplarRepository.findAll().stream().filter(ex ->
-                (
-                        ex.getStore().getId() == storeId) &&
-                        (ex.getVehicle().getCarType() == carType) &&
-                        (ex.getVehicle().getFuelType() == fuelType) &&
-                        (ex.getPricePerDay().compareTo(price) <= 0) &&
-                        (ex.getVehicle().getEngineCapacity() >= capacity) &&
-                        isAvailable(ex, startDate, endDate)
-                )
-                .map(VehicleExemplarMapper::mamToDto).toList();
+        if (fuelType != null && !fuelType.isEmpty())
+            spec = spec.and(VehicleSpecification.isFuelType(fuelType));
+
+        if (price != null)
+            spec = spec.and(VehicleSpecification.hasMaxPrice(price));
+
+        if (seats != null && !seats.isEmpty())
+            spec = spec.and(VehicleSpecification.seatsCount(seats));
+
+
+        return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> isAvailable(vehicle, startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
     }
+
 
     private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
         List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
@@ -160,4 +183,45 @@ public class VehicleService {
                 booking.getPlannedDropOffDate().isAfter(startDate));
     }
 
+    public VehicleExemplarDto findVehicleExemplarById(long id) {
+        VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        return VehicleExemplarMapper.mapToDto(exemplar);
+    }
+
+    public AutoCountDto countVehiclesPerType(AutoCountRequestDto dto) {
+        long storeId = dto.storeId();
+
+        // Retrieve a list of available vehicle exemplars for the specified store ID and filter them by availability within the given date range.
+        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> isAvailable(vehicle, dto.startDate(), dto.endDate())).toList();
+
+        // Count the number of vehicle exemplars by fuel type and car type, storing the results in separate maps.
+        Map<FuelType, Long> fuelTypeCounts = availableExemplars.stream().collect(Collectors.groupingBy(vehicle -> vehicle.getVehicle().getFuelType(), Collectors.counting()));
+
+        Map<CarType, Long> carTypeCounts = availableExemplars.stream()
+                .collect(Collectors.groupingBy(vehicle ->
+                                vehicle.getVehicle().getCarType(),
+                        Collectors.counting()));
+
+        // Create a list of EnumDto objects representing car types and their respective counts.
+        List<EnumDto> carTypes = carTypeCounts.entrySet().stream()
+                .map(entry -> new EnumDto(
+                        entry.getKey().getTypeName(),
+                        entry.getKey().name(),
+                        entry.getValue()
+                ))
+                .toList();
+
+        List<EnumDto> fuelTypes = fuelTypeCounts.entrySet().stream()
+                .map(entry -> new EnumDto(
+                        entry.getKey().getTypeName(),
+                        entry.getKey().name(),
+                        entry.getValue()
+                ))
+                .toList();
+
+        return new AutoCountDto(
+            carTypes,
+            fuelTypes
+        );
+    }
 }

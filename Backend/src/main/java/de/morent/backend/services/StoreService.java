@@ -10,6 +10,7 @@ import de.morent.backend.enums.UserRole;
 import de.morent.backend.mappers.AddressMapper;
 import de.morent.backend.mappers.StoreMapper;
 import de.morent.backend.repositories.StoreRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +63,7 @@ public class StoreService {
         return true;
     }
 
+
     public List<StoreShortDTO> getStoresCloseByAddress(String city) {
         city = VowelConverter.convertString(city);
         List<Store> stores;
@@ -110,5 +112,9 @@ public class StoreService {
 
     public Optional<Store> findStoreById(long storeId) {
         return storeRepository.findById(storeId);
+
+    public Store findById(long storeId) {
+        return storeRepository.findById(storeId).orElseThrow(() -> new EntityNotFoundException("Store was not found"));
+
     }
 }
