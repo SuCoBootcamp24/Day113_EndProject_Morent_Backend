@@ -18,6 +18,7 @@ import de.morent.backend.repositories.VehicleRepository;
 import de.morent.backend.specifications.VehicleSpecification;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class VehicleService {
     private BookingService bookingService;
 
 
-    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService, BookingService bookingService) {
+    public VehicleService(VehicleRepository vehicleRepository, ImagesService imagesService, VehicleExemplarRepository vehicleExemplarRepository, StoreService storeService,@Lazy BookingService bookingService) {
         this.vehicleRepository = vehicleRepository;
         this.imagesService = imagesService;
         this.vehicleExemplarRepository = vehicleExemplarRepository;
@@ -172,7 +173,7 @@ public class VehicleService {
             spec = spec.and(VehicleSpecification.seatsCount(seats));
 
 
-        return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> isAvailable(vehicle, startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
+        return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
     }
 
 
@@ -187,12 +188,16 @@ public class VehicleService {
         VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
         return VehicleExemplarMapper.mapToDto(exemplar);
     }
+    public VehicleExemplar findEntityVehicleExemplarById(long id) {
+        return vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+
+    }
 
     public AutoCountDto countVehiclesPerType(AutoCountRequestDto dto) {
         long storeId = dto.storeId();
 
         // Retrieve a list of available vehicle exemplars for the specified store ID and filter them by availability within the given date range.
-        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> isAvailable(vehicle, dto.startDate(), dto.endDate())).toList();
+        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), dto.startDate(), dto.endDate())).toList();
 
         // Count the number of vehicle exemplars by fuel type and car type, storing the results in separate maps.
         Map<FuelType, Long> fuelTypeCounts = availableExemplars.stream().collect(Collectors.groupingBy(vehicle -> vehicle.getVehicle().getFuelType(), Collectors.counting()));
