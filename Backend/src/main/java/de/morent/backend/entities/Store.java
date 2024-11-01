@@ -24,7 +24,7 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<VehicleExemplar> vehicleExemplars = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne
     private User manager;
 
 }

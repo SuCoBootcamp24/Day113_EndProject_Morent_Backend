@@ -1,6 +1,7 @@
 package de.morent.backend.services;
 
 import de.morent.backend.entities.Address;
+import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -11,9 +12,11 @@ import java.util.Map;
 @Service
 public class GeocodingService {
     private final RestTemplate restTemplate;
+    private RedisService redisService;
 
-    public GeocodingService(RestTemplate restTemplate) {
+    public GeocodingService(RestTemplate restTemplate, RedisService redisService) {
         this.restTemplate = restTemplate;
+        this.redisService = redisService;
     }
 
 
@@ -32,6 +35,9 @@ public class GeocodingService {
 
 
     public String getCoordinates(String address) {
+        if (redisService.hasKey(address)) {
+            return redisService.getValue(address);
+        }
 
         String url = UriComponentsBuilder.fromHttpUrl("https://nominatim.openstreetmap.org/search")
                 .queryParam("q", address)
@@ -39,8 +45,7 @@ public class GeocodingService {
                 .queryParam("addressdetails", "1")
                 .toUriString();
 
-        //String url = "https://nominatim.openstreetmap.org/search?q=Berner%20heerweg%20151,%20Hamburg,%2022159,%20Deutschland&format=xml&polygon=1&addressdetails=1";
-        System.out.println(url);
+         System.out.println(url);
         List<Map<String, Object>> response = restTemplate.getForObject(url, List.class);
 
         System.out.println(response);
@@ -54,5 +59,39 @@ public class GeocodingService {
     }
 
 
+    public double calcDistance(String fromName, String fromAddress,String toName, String toAddress) {
+        if (fromName == null || fromAddress == null || toName == null || toAddress == null) {
+            throw new IllegalArgumentException("All parameters must be provided.");
+        }
 
+        if (!redisService.locationExists(fromName))
+            convertStringToLocation(fromName, fromAddress);
+        if (!redisService.locationExists(toName))
+            convertStringToLocation(toName, toAddress);
+
+        System.out.println();
+        Double distance = redisService.getDistance(fromName, toName, Metrics.KILOMETERS);
+        System.out.println(distance);
+        return distance;
+    }
+
+    private void convertStringToLocation(String name, String address) {
+        String[] parts = address.split(",");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid coordinate format. Anticipated: 'latitude, longitude'.");
+        }
+        try {
+            double latitude = Double.parseDouble(parts[0].trim());
+            double longitude = Double.parseDouble(parts[1].trim());
+            redisService.addLocation(name, latitude, longitude);
+            System.out.println("AddLocation:" + " " + name + ", " + latitude + ", " + longitude);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Coordinates could not be parsed", e);
+        }
+    }
+
+    public void deleteLocation() {
+        redisService.deleteAllLocations();
+        System.out.println("All locations deleted.");
+    }
 }
