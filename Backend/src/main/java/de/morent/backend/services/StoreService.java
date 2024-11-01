@@ -13,11 +13,9 @@ import de.morent.backend.repositories.StoreRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,13 +57,13 @@ public class StoreService {
         newStore.setManager(newManager);
 
         storeRepository.save(newStore);
-        System.out.println(newStore);
         return true;
     }
 
 
     public List<StoreShortDTO> getStoresCloseByAddress(String city) {
         city = VowelConverter.convertString(city);
+        city = StringUtils.capitalize(city);
         List<Store> stores;
         stores = findStoreByCity(city);
 
@@ -75,16 +73,16 @@ public class StoreService {
 
     private List<StoreShortDTO> getFirstFiveStoresInRange(String city) {
         List<Store> stores;
+        String searchLocation = geocodingService.getCoordinates(city);
         stores = findAllStores();
         if (stores.isEmpty()) return List.of();
         return stores.stream()
                 .map(store -> {
-                    String searchLocation = geocodingService.getCoordinates(city);
                     double distance = geocodingService.calcDistance(
-                            store.getName(),
-                            store.getAddress().getCoordinates(),
                             city,
-                            searchLocation
+                            searchLocation,
+                            store.getName(),
+                            store.getAddress().getCoordinates()
                             );
 
                     return new StoreShortDTO(
@@ -94,6 +92,9 @@ public class StoreService {
                             distance
                             );
                 })
+                .filter(store -> store.distance() < 50.0)
+                .sorted(Comparator.comparingDouble(StoreShortDTO::distance))
+                .limit(5)
                 .collect(Collectors.toList());
     }
 
@@ -106,7 +107,6 @@ public class StoreService {
     }
 
     private List<Store> findStoreByCity(String city) {
-        System.out.println("######CITY: " + city);
         List<Store> existingStore = storeRepository.findAllByAddress_City(city);
         if (existingStore!= null) return existingStore;
         return List.of();
