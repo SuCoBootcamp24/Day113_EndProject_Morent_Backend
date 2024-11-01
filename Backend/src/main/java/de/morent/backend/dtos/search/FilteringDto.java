@@ -13,6 +13,8 @@ public record FilteringDto(
         LocalDate endDate,
         List<CarType> carType,
         List<FuelType> fuelType,
+        List<Integer> seats,
         BigDecimal pricePerDay
+
 ) {
 }
