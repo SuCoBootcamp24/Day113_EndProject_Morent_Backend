@@ -65,10 +65,12 @@ public class RedisService {
         geoOps.add(GEO_KEY, new Point(lon, lat), name);
     }
 
-    public Double getDistance(String location1, String location2, Metric metric) {
+    public double getDistance(String location1, String location2, Metric metric) {
+        System.out.println("getDistance" + location1 + ": " + location2);
         GeoOperations<String, String> geoOps = redisTemplate.opsForGeo();
         Distance distance = geoOps.distance(GEO_KEY, location1, location2, metric);
-        return (distance != null) ? distance.getValue() : null;
+        System.out.println("Distance " + distance);
+        return (distance != null) ? distance.getValue() : 0.0;
     }
 
 }
