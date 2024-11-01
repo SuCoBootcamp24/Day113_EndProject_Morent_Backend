@@ -5,7 +5,7 @@ import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
 import de.morent.backend.entities.VehicleExemplar;
 
 public class VehicleExemplarMapper {
-    public static VehicleExemplarDto mamToDto(VehicleExemplar car) {
+    public static VehicleExemplarDto mapToDto(VehicleExemplar car) {
         VehicleDTO vehicleDTO = VehicleMapper.mapToDto(car.getVehicle());
         return new VehicleExemplarDto(
                 car.getId(),
