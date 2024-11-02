@@ -1,6 +1,6 @@
 package de.morent.backend.mappers;
 
-import de.morent.backend.dtos.AddressDTO;
+import de.morent.backend.dtos.address.AddressDTO;
 import de.morent.backend.entities.Address;
 import org.springframework.stereotype.Component;
 
