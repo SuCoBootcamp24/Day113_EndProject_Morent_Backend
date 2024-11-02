@@ -2,6 +2,7 @@ package de.morent.backend.services;
 
 import de.morent.backend.dtos.bookings.BookingRequestDto;
 import de.morent.backend.dtos.bookings.BookingResponseDto;
+import de.morent.backend.dtos.bookings.BookingShortResponseDto;
 import de.morent.backend.entities.Booking;
 import de.morent.backend.entities.Store;
 import de.morent.backend.entities.User;
@@ -10,8 +11,12 @@ import de.morent.backend.enums.BookingStatus;
 import de.morent.backend.exceptions.IllegalBookingException;
 import de.morent.backend.mappers.BookingMapper;
 import de.morent.backend.repositories.BookingRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +43,7 @@ public class BookingService {
         this.mailService = mailService;
     }
 
+    // POST NEW BOOKING - USER
     @Transactional
     public BookingResponseDto makeBooking(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
         confirmBookingDataValidity(dto, authentication);
@@ -62,16 +68,18 @@ public class BookingService {
         bookingRepository.save(newBooking);
 
         BookingResponseDto booking = BookingMapper.mapToDto(newBooking);
-        mailService.sendBookingConfirmationEmail(user.getEmail(),booking);
+        // mailService.sendBookingConfirmationEmail(user.getEmail(),booking);
         return booking;
     }
 
     private void confirmBookingDataValidity(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
+
         if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
 
         if (dto.pickUpDate().isAfter(dto.planedDropOffDate()) || dto.pickUpDate().isBefore(LocalDate.now())) throw new IllegalBookingException("The dates are invalid");
 
         if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
+
     }
 
     private BigDecimal calculateTotalPrice(BookingRequestDto dto, VehicleExemplar vehicle) {
@@ -115,11 +123,51 @@ public class BookingService {
         return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
     }
 
-    public List<Booking> getAllExemplarBooking (long vehicleExemplarId) {
-        return bookingRepository.findAllByVehicleId(vehicleExemplarId);
+    // GET ALL PERSONAL BOOKINGS - USER
+    public List<BookingShortResponseDto> getAllPersonalBookings(Authentication authentication) {
+        if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
+        User user = userService.findUserByEmail(authentication.getName());
+        return bookingRepository.findAll().stream()
+                .filter(booking -> booking.getUser().getId() == user.getId())
+                .map(BookingMapper::mapToShortDto)
+                .toList();
+    }
+
+    // GET ONE PERSONAL BOOKING - USER
+    public BookingResponseDto getPersonalBookingById(Long id, Authentication authentication) {
+        if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
+        User user = userService.findUserByEmail(authentication.getName());
+        Booking booking = bookingRepository.findById(user.getId()).orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+        return BookingMapper.mapToDto(booking);
+    }
+
+    // CANCEL ONE BOOKING UP TO 24H BEFORE THE START DATE - USER
+    public void cancelBooking(Long id, Authentication authentication) {
+        if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
+        User user = userService.findUserByEmail(authentication.getName());
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+        if(booking.getUser().getId()!= user.getId()) throw new IllegalArgumentException("You are not allowed to cancel this booking");
+        if (LocalDate.now().isAfter(booking.getPickUpDate().minusDays(1))) {
+            throw new IllegalArgumentException("Cancellation is only allowed up to 24 hours before the booking start date");
+        }
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
     }
 
     public List<Booking> getBookingsFromStore(long storeId) {
         return bookingRepository.findAllByPickUpLocationId(storeId);
     }
+    // ----------------  ADMINISTRATION
+
+    // GET ALL BOOKING / EVEN JUST FROM A STORE - ADMIN
+    public List<BookingShortResponseDto> getAllBookings(long storeId, int pageNo, int recordSize) {
+        Pageable pageable = PageRequest.of(pageNo, recordSize);
+        return bookingRepository.findAllByPickUpLocationId(storeId, pageable)
+               .stream()
+               .map(BookingMapper::mapToShortDto)
+               .toList();
+
+    }
+
+
 }
