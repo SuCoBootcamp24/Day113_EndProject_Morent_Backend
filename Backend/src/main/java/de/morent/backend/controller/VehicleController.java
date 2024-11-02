@@ -39,11 +39,6 @@ public class VehicleController {
         else return ResponseEntity.badRequest().build();
     }
 
-    //GET / Get all vehicles
-/*    @GetMapping
-    public ResponseEntity<List<VehicleDTO>> getAllVehicles() {
-        return ResponseEntity.ok(vehicleService.getAllVehicles());
-    }  */
 
     //GET / Get all vehicles (PAGES)
     @GetMapping("all")
