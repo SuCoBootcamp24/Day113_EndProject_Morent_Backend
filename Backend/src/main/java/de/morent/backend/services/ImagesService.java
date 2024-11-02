@@ -2,6 +2,7 @@ package de.morent.backend.services;
 
 import de.morent.backend.dtos.images.ImgbbDTO;
 import de.morent.backend.entities.Image;
+import de.morent.backend.entities.Profile;
 import de.morent.backend.entities.Vehicle;
 import de.morent.backend.repositories.ImageRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -24,8 +25,6 @@ public class ImagesService {
 
     @Value("${imgbb.url}")
     private String IMGBB_URL;
-
-
     private ImageRepository imageRepository;
 
     public ImagesService(ImageRepository imageRepository) {
@@ -34,36 +33,42 @@ public class ImagesService {
 
     public Image setImageToVehicle(Vehicle vehicle, MultipartFile file) {
 
-        if (vehicle == null) {
+        if (vehicle == null) throw new IllegalArgumentException("Vehicle must not be null");
+        if (file == null) throw new IllegalArgumentException("File must not be null");
+
+        String imgName = vehicle.getBrand() + "_" + vehicle.getModel();
+        if (vehicle.isAutomatic()) imgName += "_Automatik";
+        else imgName += "_Schalter";
+
+        return getImage(file, imgName);
+    }
+
+    public Image setImageToUserProfile(Profile userProfile, MultipartFile file) {
+        if (userProfile == null) {
             throw new IllegalArgumentException("Vehicle must not be null");
         }
         if (file == null) {
             throw new IllegalArgumentException("File must not be null");
         }
 
-        String imgName = vehicle.getBrand() + "_" + vehicle.getModel();
-        if (vehicle.isAutomatic()) imgName += "_Automatik";
-        else imgName += "_Schalter";
+        String imgName = "UserProfile-" + userProfile.getId();
+        return getImage(file, imgName);
+    }
 
+    private Image getImage(MultipartFile file, String imgName) {
         ResponseEntity<ImgbbDTO> response = uploadImageToBudget(file);
+        //System.out.println(response);
 
         Image img = new Image();
         img.setImagesName(imgName);
         img.setImageUrl(response.getBody().data().url());
-        img.setThumbnailUrl(response.getBody().thumb().thumbnailUrl());
 
         img = imageRepository.save(img);
 
         return img;
     }
 
-
-    //setImageToVehicle
-
-
-
-
-    ResponseEntity<ImgbbDTO> uploadImageToBudget(MultipartFile file) {
+    private ResponseEntity<ImgbbDTO> uploadImageToBudget(MultipartFile file) {
         RestClient restClient = RestClient.create(IMGBB_URL);
 
         MultiValueMap<String, Resource> body = new LinkedMultiValueMap<>();
@@ -74,7 +79,7 @@ public class ImagesService {
                 .body(body)
                 .retrieve()
                 .toEntity(ImgbbDTO.class);
-
         return response;
     }
+
 }
