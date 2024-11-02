@@ -52,6 +52,7 @@ public class BookingMapper {
                 dropOffStore,
                 newBooking.getVehicle().getPricePerDay(),
                 newBooking.getTotalPrice(),
+                newBooking.getDropOffDifferentStoreExtraCharge(),
                 newBooking.getStatus()
         );
 

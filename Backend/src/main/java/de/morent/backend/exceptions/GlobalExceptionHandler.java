@@ -14,7 +14,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalBookingException.class)
-    public ResponseEntity<String> handleIllegalBookingException(EntityNotFoundException ex){
+    public ResponseEntity<String> handleIllegalBookingException(IllegalBookingException ex){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

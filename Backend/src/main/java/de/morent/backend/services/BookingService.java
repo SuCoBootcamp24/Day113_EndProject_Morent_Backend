@@ -38,41 +38,63 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDto makeBooking(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
+        confirmBookingDataValidity(dto, authentication);
 
-        // to implement yet:
-        // user is not locked
-        // User Profile not complete yet /maybe with an END request
-        // check if dates are not in the past
-        // if pick-up and drop-of are different, charge a fee
-
-        if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
-        if(!isUserProfileComplete(user)) throw new IllegalBookingException("User Profile is not complete yet");
+        checkUserProfileIfComplete(user);
         VehicleExemplar vehicle = vehicleService.findEntityVehicleExemplarById(dto.vehicleExemplarId());
         Store pickUpStore = storeService.findById(dto.pickUpLocationId());
         Store dropOfStore = storeService.findById(dto.dropOffLocationId());
-
-        // Check if vehicle exemplar is available
-        if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
-
-        BigDecimal totalPrice = calculateTotalPrice(vehicle.getPricePerDay(),dto.pickUpDate(), dto.planedDropOffDate());
 
         Booking newBooking = new Booking();
         newBooking.setUser(user);
         newBooking.setBookingNumber(generateUniqueBookingNumber());
         newBooking.setVehicle(vehicle);
+        newBooking.setPickUpDate(dto.pickUpDate());
+        newBooking.setPlannedDropOffDate(dto.planedDropOffDate());
         newBooking.setPickUpLocation(pickUpStore);
         newBooking.setDropOffLocation(dropOfStore);
-        newBooking.setTotalPrice(totalPrice);
+        newBooking.setTotalPrice(calculateTotalPrice(dto, vehicle));
+        if(dto.pickUpLocationId() != dto.dropOffLocationId()) newBooking.setDropOffDifferentStoreExtraCharge(true);
         newBooking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(newBooking);
 
         return BookingMapper.mapToDto(newBooking);
     }
 
+    private void confirmBookingDataValidity(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
+        if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
 
-    private boolean isUserProfileComplete(User user) {
-        return true;
+        if (dto.pickUpDate().isAfter(dto.planedDropOffDate()) || dto.pickUpDate().isBefore(LocalDate.now())) throw new IllegalBookingException("The dates are invalid");
+
+        if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
+    }
+
+    private BigDecimal calculateTotalPrice(BookingRequestDto dto, VehicleExemplar vehicle) {
+        BigDecimal totalPrice = calculateTotalPrice(vehicle.getPricePerDay(), dto.pickUpDate(), dto.planedDropOffDate());
+        // if pick-up and drop-of stores are different, charge a 150.00 € extra fee
+        if(dto.pickUpLocationId() != dto.dropOffLocationId()) {
+            totalPrice = totalPrice.add(BigDecimal.valueOf(150.00));
+        }
+        return totalPrice;
+    }
+
+
+    private void checkUserProfileIfComplete(User user) throws IllegalBookingException {
+        StringBuilder errorMessage = new StringBuilder("Bitte vervollständigen Sie zuerst Ihr Profil. Folgende Angaben fehlen: ");
+
+        if (user.getProfile().getAddress() == null)
+            errorMessage.append("\n- Adresse");
+
+        if (user.getProfile().getPhoneNumber() == null)
+            errorMessage.append("\n- Telefonnummer");
+
+        if (user.getProfile().getDateOfBirth() == null)
+            errorMessage.append("\n- Geburtsdatum");
+
+        if (errorMessage.length() > "Bitte vervollständigen Sie zuerst Ihr Profil. Folgende Angaben fehlen: ".length()) {
+            throw new IllegalBookingException(errorMessage.toString());
+        }
     }
 
     private String generateUniqueBookingNumber() {
@@ -84,13 +106,9 @@ public class BookingService {
         return pricePerDay.multiply(BigDecimal.valueOf(daysBetween));
     }
 
-    // Check availability vehicle
+    // Check availability vehicle and validity of dates
     public boolean autoIsAvailable(long autoId, LocalDate pickUpDate, LocalDate dropOffDate) {
-        return bookingRepository.findAll().stream().filter(
-          vehicle -> vehicle.getId() == autoId)
-                .noneMatch(
-                        booking -> booking.getPickUpDate().isBefore(dropOffDate) &&
-                        booking.getPlannedDropOffDate().isAfter(pickUpDate));
+        return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
     }
 
     public List<Booking> getAllExemplarBooking (long vehicleExemplarId) {
