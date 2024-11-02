@@ -62,7 +62,7 @@ public class StoreService {
 
 
     public List<StoreShortDTO> getStoresCloseByAddress(String city) {
-        city = VowelConverter.convertString(city);
+        city = VowelConverter.convertStringWithAll(city);
         city = StringUtils.capitalize(city);
         List<Store> stores;
         stores = findStoreByCity(city);

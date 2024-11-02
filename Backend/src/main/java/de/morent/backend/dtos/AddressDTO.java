@@ -1,7 +1,7 @@
 package de.morent.backend.dtos;
 
 public record AddressDTO(
-        String Street,
+        String street,
         String houseNumber,
         String zipCode,
         String city,
