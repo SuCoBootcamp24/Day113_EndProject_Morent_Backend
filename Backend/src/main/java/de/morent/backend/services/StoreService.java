@@ -1,6 +1,6 @@
 package de.morent.backend.services;
 
-import de.morent.backend.converter.VowelConverter;
+import de.morent.backend.tools.VowelConverter;
 import de.morent.backend.dtos.store.StoreRequestDTO;
 import de.morent.backend.dtos.store.StoreShortDTO;
 import de.morent.backend.entities.Address;

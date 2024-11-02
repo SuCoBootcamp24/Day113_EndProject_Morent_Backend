@@ -1,4 +1,4 @@
-package de.morent.backend.dtos;
+package de.morent.backend.dtos.address;
 
 public record AddressDTO(
         String street,

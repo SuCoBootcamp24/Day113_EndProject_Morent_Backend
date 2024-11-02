@@ -1,6 +1,6 @@
 package de.morent.backend.services;
 
-import de.morent.backend.converter.VowelConverter;
+import de.morent.backend.tools.VowelConverter;
 import de.morent.backend.entities.Address;
 import org.springframework.data.geo.Metrics;
 import org.springframework.stereotype.Service;

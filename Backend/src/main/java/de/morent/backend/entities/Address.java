@@ -27,7 +27,6 @@ public class Address {
     @NotBlank
     private String country;
 
-    @NotBlank
     private String coordinates;
 
 
