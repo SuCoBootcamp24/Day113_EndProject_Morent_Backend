@@ -16,7 +16,6 @@ import de.morent.backend.mappers.VehicleMapper;
 import de.morent.backend.repositories.VehicleExemplarRepository;
 import de.morent.backend.repositories.VehicleRepository;
 import de.morent.backend.specifications.VehicleSpecification;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -58,7 +57,7 @@ public class VehicleService {
 
     public boolean createVehicle(VehicleRequestDTO dto) {
         Optional<Vehicle> existingVehicle = vehicleRepository.findByBrandAndModelAndIsAutomatic(dto.brand(), dto.model(), dto.isAutomatic());
-        if (existingVehicle.isPresent()) throw new EntityExistsException("Vehicle already exists");
+        if (existingVehicle.isPresent()) throw new EntityNotFoundException("Vehicle already exists");
 
         Vehicle newVehicle = new Vehicle();
         newVehicle.setCarType(dto.carType());
@@ -182,11 +181,11 @@ public class VehicleService {
     }
 
     public VehicleExemplarDto findVehicleExemplarById(long id) {
-        VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityNotFoundException("VehicleExemplar not found"));
         return VehicleExemplarMapper.mapToDto(exemplar);
     }
     public VehicleExemplar findEntityVehicleExemplarById(long id) {
-        return vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        return vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityNotFoundException("VehicleExemplar not found"));
 
     }
 

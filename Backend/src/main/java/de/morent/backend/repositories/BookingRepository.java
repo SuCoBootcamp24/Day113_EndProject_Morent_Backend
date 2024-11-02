@@ -23,4 +23,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     boolean isVehicleAvailable(@Param("autoId") long autoId,
                                @Param("pickUpDate") LocalDate pickUpDate,
                                @Param("dropOffDate") LocalDate dropOffDate);
+
 }

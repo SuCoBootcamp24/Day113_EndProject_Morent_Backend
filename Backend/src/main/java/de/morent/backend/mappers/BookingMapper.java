@@ -2,6 +2,7 @@ package de.morent.backend.mappers;
 
 import de.morent.backend.dtos.AddressDTO;
 import de.morent.backend.dtos.bookings.BookingResponseDto;
+import de.morent.backend.dtos.bookings.BookingShortResponseDto;
 import de.morent.backend.dtos.store.BookingStoreResponseDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.entities.Booking;
@@ -56,5 +57,18 @@ public class BookingMapper {
                 newBooking.getStatus()
         );
 
+    }
+
+    public static BookingShortResponseDto mapToShortDto(Booking booking) {
+        return new BookingShortResponseDto(
+                booking.getBookingNumber(),
+                booking.getUser().getProfile().getFirstName(),
+                booking.getUser().getProfile().getLastName(),
+                booking.getPickUpLocation().getName(),
+                booking.getPickUpLocation().getAddress().getCity(),
+                booking.getPickUpDate(),
+                booking.getStatus(),
+                booking.getTotalPrice()
+                );
     }
 }
