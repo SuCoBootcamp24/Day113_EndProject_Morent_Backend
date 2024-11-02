@@ -2,6 +2,7 @@ package de.morent.backend.services;
 
 import de.morent.backend.dtos.auth.AuthResponseDTO;
 import de.morent.backend.dtos.auth.SignUpRequestDto;
+import de.morent.backend.dtos.user.UserDetailsDTO;
 import de.morent.backend.dtos.user.UserProfileRequestDTO;
 import de.morent.backend.dtos.user.UserProfileResponseDTO;
 import de.morent.backend.entities.Address;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
@@ -63,6 +65,8 @@ public class UserService {
         Optional<User> existingUser = getUserByEmail(auth.getName());
         if (existingUser.isEmpty()) throw new UsernameNotFoundException("User " + auth.getName() + " not found");
         String token = authService.getToken(auth, existingUser.get().getProfile().getFirstName());
+        existingUser.get().setUpdated(LocalDateTime.now());
+        userRepository.save(existingUser.get());
         return new AuthResponseDTO(token);
     }
 
@@ -152,5 +156,10 @@ public class UserService {
             return true;
         }
         return false;
+    }
+
+    public UserDetailsDTO getUserDetails(Authentication auth) {
+        User user = findUserByEmail(auth.getName());
+        return UserMapper.toUserDetailsDTO(user);
     }
 }
