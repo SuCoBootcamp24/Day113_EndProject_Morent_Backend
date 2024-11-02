@@ -157,6 +157,7 @@ public class BookingService {
     public List<Booking> getBookingsFromStore(long storeId) {
         return bookingRepository.findAllByPickUpLocationId(storeId);
     }
+
     // ----------------  ADMINISTRATION
 
     // GET ALL BOOKING / EVEN JUST FROM A STORE - ADMIN
@@ -169,5 +170,8 @@ public class BookingService {
 
     }
 
-
+    // GET ONE BOOKING - ADMIN
+    public Booking getBookingById(long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking with id: " + bookingId + " found"));
+    }
 }

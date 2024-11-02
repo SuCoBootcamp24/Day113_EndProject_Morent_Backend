@@ -3,7 +3,8 @@ package de.morent.backend.enums;
 public enum BookingStatus {
     CANCELLED("Storniert"),
     CONFIRMED("Bestätigt"),
-    COMPLETED("Abgeschlossen");
+    COMPLETED("Abgeschlossen"),
+    IN_REVIEW("In Revision");
 
     private final String statusName;
 
