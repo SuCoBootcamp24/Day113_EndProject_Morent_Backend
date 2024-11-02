@@ -18,8 +18,6 @@ public class Image {
 
     private String imageUrl;
 
-    private String thumbnailUrl;
-
     @UpdateTimestamp
     private LocalDate uploadDate;
 
