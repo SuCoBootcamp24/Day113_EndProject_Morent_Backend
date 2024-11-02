@@ -14,7 +14,6 @@ public record UserProfileRequestDTO(
             String houseNumber,
             String zipCode,
             String city,
-            String country,
-            String coordinates
+            String country
 ) {
 }
