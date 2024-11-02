@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -27,12 +28,10 @@ public class Damage {
     @Column
     private boolean isRepaired;
 
+/*
     @ManyToOne
     private DamageProfile damageProfile;
+*/
 
-    @PrePersist
-    public void onCreate(){
-        this.created = LocalDate.now();
-    }
 
 }
