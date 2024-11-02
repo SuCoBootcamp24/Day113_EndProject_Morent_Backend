@@ -1,6 +1,4 @@
-package de.morent.backend.converter;
-
-import org.springframework.stereotype.Component;
+package de.morent.backend.tools;
 
 
 public class VowelConverter {
