@@ -1,6 +1,6 @@
 package de.morent.backend.mappers;
 
-import de.morent.backend.dtos.AddressDTO;
+import de.morent.backend.dtos.address.AddressDTO;
 import de.morent.backend.dtos.bookings.BookingResponseDto;
 import de.morent.backend.dtos.store.BookingStoreResponseDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
