@@ -52,7 +52,7 @@ public class StoreService {
 
         newStore.setAddress(newAddress);
 
-        User newManager = userService.findUserById(dto.managerId()).orElseThrow(() -> new NoSuchElementException("User was not found"));
+        User newManager = userService.findUserById(dto.managerId()).orElseThrow(() -> new EntityNotFoundException("User was not found"));
         if (!newManager.getRole().equals(UserRole.MANAGER)) throw new IllegalArgumentException("User is not a manager");
         newStore.setManager(newManager);
 
