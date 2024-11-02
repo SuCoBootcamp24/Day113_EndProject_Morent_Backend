@@ -2,9 +2,11 @@ package de.morent.backend.services;
 
 import de.morent.backend.dtos.auth.AuthResponseDTO;
 import de.morent.backend.dtos.auth.SignUpRequestDto;
+import de.morent.backend.dtos.user.UserDetailsDTO;
 import de.morent.backend.dtos.user.UserProfileRequestDTO;
 import de.morent.backend.dtos.user.UserProfileResponseDTO;
 import de.morent.backend.entities.Address;
+import de.morent.backend.entities.Image;
 import de.morent.backend.entities.Profile;
 
 import de.morent.backend.entities.User;
@@ -21,7 +23,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
@@ -31,17 +35,17 @@ public class UserService {
 
     private UserRepository userRepository;
     private ProfileRepository profileRepository;
-    private AddressRepository addressRepository;
+    private ImagesService imagesService;
     private AuthService authService;
     private PasswordEncoder passwordEncoder;
     private VerifyService verifyService;
     private RedisService redisService;
     private TokenService tokenService;
 
-    public UserService(UserRepository userRepository, ProfileRepository profileRepository, AddressRepository addressRepository, AuthService authService, PasswordEncoder passwordEncoder, VerifyService verifyService, RedisService redisService, TokenService tokenService) {
+    public UserService(UserRepository userRepository, ProfileRepository profileRepository, ImagesService imagesService, AuthService authService, PasswordEncoder passwordEncoder, VerifyService verifyService, RedisService redisService, TokenService tokenService) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
-        this.addressRepository = addressRepository;
+        this.imagesService = imagesService;
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
         this.verifyService = verifyService;
@@ -61,6 +65,8 @@ public class UserService {
         Optional<User> existingUser = getUserByEmail(auth.getName());
         if (existingUser.isEmpty()) throw new UsernameNotFoundException("User " + auth.getName() + " not found");
         String token = authService.getToken(auth, existingUser.get().getProfile().getFirstName());
+        existingUser.get().setUpdated(LocalDateTime.now());
+        userRepository.save(existingUser.get());
         return new AuthResponseDTO(token);
     }
 
@@ -94,8 +100,7 @@ public class UserService {
     }
 
     public Authentication getAuthentication(User user) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
-        return authentication;
+        return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
     }
 
 
@@ -139,4 +144,22 @@ public class UserService {
         return true;
     }
 
+    @Transactional
+    public boolean setNewImagesToUserProfile(MultipartFile file, Authentication auth) {
+        User user = findUserByEmail(auth.getName());
+        Profile userProfile = user.getProfile();
+
+        Image img = imagesService.setImageToUserProfile(userProfile, file);
+        if (img!= null) {
+            userProfile.setImage(img);
+            profileRepository.save(userProfile);
+            return true;
+        }
+        return false;
+    }
+
+    public UserDetailsDTO getUserDetails(Authentication auth) {
+        User user = findUserByEmail(auth.getName());
+        return UserMapper.toUserDetailsDTO(user);
+    }
 }

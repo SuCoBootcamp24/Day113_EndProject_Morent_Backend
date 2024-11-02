@@ -29,7 +29,7 @@ public class VehicleMapper {
                 vehicle.getEngineCapacity(),
                 vehicle.isAutomatic(),
                 vehicle.getFuelType(),
-                vehicle.getImage().getThumbnailUrl(),
+                vehicle.getImage().getImageUrl(),
                 vehicle.getConsumption()
         );
     }
