@@ -173,7 +173,12 @@ public class VehicleService {
             spec = spec.and(VehicleSpecification.seatsCount(seats));
 
 
-        return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
+        return vehicleExemplarRepository.findAll(spec, pageable).stream()
+                .filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), startDate, endDate))
+                .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
+                .values().stream()
+                .map(List::getFirst)
+                .map(VehicleExemplarMapper::mapToDto).toList();
     }
 
     public VehicleExemplarDto findVehicleExemplarById(long id) {
