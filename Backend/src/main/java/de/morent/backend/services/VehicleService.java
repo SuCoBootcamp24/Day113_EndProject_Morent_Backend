@@ -51,6 +51,8 @@ public class VehicleService {
         this.bookingService = bookingService;
     }
 
+
+
     public VehicleDTO findVehicleById(long vehicleId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new EntityNotFoundException("Vehicle with id: " + vehicleId + " not found"));
         return VehicleMapper.mapToDto(vehicle);
@@ -85,20 +87,12 @@ public class VehicleService {
     }
 
     public boolean createMoreVehicles(VehicleRequestDTO[] dtos) {
+        if (dtos == null) return false;
         for (VehicleRequestDTO dto : dtos) {
             createVehicle(dto);
         }
         return true;
     }
-
-    // Get All no Pages
-/*    public List<VehicleDTO> getAllVehicles() {
-        return vehicleRepository.findAll().stream()
-               .map(VehicleMapper::mapToDto)
-               .collect(Collectors.toList());
-    }*/
-
-    // Get All with Pagination
 
     public List<VehicleDTO> getAllVehicles(int pageNo, int recordCount) {
         Pageable pageable = PageRequest.of(pageNo, recordCount);
@@ -126,7 +120,7 @@ public class VehicleService {
     }
 
     public void deleteVehicle(long id) {
-        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("VehicleId is failed after Images upload"));
+        Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("vehicle not found"));
         vehicleRepository.delete(vehicle);
     }
 
@@ -182,11 +176,12 @@ public class VehicleService {
     }
 
     public VehicleExemplarDto findVehicleExemplarById(long id) {
-        VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        VehicleExemplar exemplar = vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
         return VehicleExemplarMapper.mapToDto(exemplar);
     }
+
     public VehicleExemplar findEntityVehicleExemplarById(long id) {
-        return vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
+        return vehicleExemplarRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("VehicleExemplar not found"));
 
     }
 
