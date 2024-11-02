@@ -1,5 +1,6 @@
 package de.morent.backend.controller;
 
+import de.morent.backend.dtos.user.UserDetailsDTO;
 import de.morent.backend.dtos.user.UserProfileRequestDTO;
 import de.morent.backend.dtos.user.UserProfileResponseDTO;
 import de.morent.backend.services.UserService;
@@ -16,6 +17,14 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    //GET /profile get UserProfile
+    @GetMapping
+    public ResponseEntity<UserDetailsDTO> getUserProfile(Authentication auth) {
+        return ResponseEntity.ok(userService.getUserDetails(auth));
+    }
+
+    //PUT /update/images Update UserProfile images
 
     //PUT /update update UserProfile
     @PutMapping("/update")
