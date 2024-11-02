@@ -47,7 +47,7 @@ public class BookingService {
 
         if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
-        if(!isUserProfileComplete(user)) throw new IllegalBookingException("User Profile is not complete yet");
+        checkUserProfileIfComplete(user);
         VehicleExemplar vehicle = vehicleService.findEntityVehicleExemplarById(dto.vehicleExemplarId());
         Store pickUpStore = storeService.findById(dto.pickUpLocationId());
         Store dropOfStore = storeService.findById(dto.dropOffLocationId());
@@ -61,6 +61,8 @@ public class BookingService {
         newBooking.setUser(user);
         newBooking.setBookingNumber(generateUniqueBookingNumber());
         newBooking.setVehicle(vehicle);
+        newBooking.setPickUpDate(dto.pickUpDate());
+        newBooking.setPlannedDropOffDate(dto.planedDropOffDate());
         newBooking.setPickUpLocation(pickUpStore);
         newBooking.setDropOffLocation(dropOfStore);
         newBooking.setTotalPrice(totalPrice);
@@ -71,8 +73,21 @@ public class BookingService {
     }
 
 
-    private boolean isUserProfileComplete(User user) {
-        return true;
+    private void checkUserProfileIfComplete(User user) throws IllegalBookingException {
+        StringBuilder errorMessage = new StringBuilder("Bitte vervollständigen Sie zuerst Ihr Profil. Folgende Angaben fehlen: ");
+
+        if (user.getProfile().getAddress() == null)
+            errorMessage.append("\n- Adresse");
+
+        if (user.getProfile().getPhoneNumber() == null)
+            errorMessage.append("\n- Telefonnummer");
+
+        if (user.getProfile().getDateOfBirth() == null)
+            errorMessage.append("\n- Geburtsdatum");
+
+        if (errorMessage.length() > "Bitte vervollständigen Sie zuerst Ihr Profil. Folgende Angaben fehlen: ".length()) {
+            throw new IllegalBookingException(errorMessage.toString());
+        }
     }
 
     private String generateUniqueBookingNumber() {
@@ -86,11 +101,7 @@ public class BookingService {
 
     // Check availability vehicle
     public boolean autoIsAvailable(long autoId, LocalDate pickUpDate, LocalDate dropOffDate) {
-        return bookingRepository.findAll().stream().filter(
-          vehicle -> vehicle.getId() == autoId)
-                .noneMatch(
-                        booking -> booking.getPickUpDate().isBefore(dropOffDate) &&
-                        booking.getPlannedDropOffDate().isAfter(pickUpDate));
+        return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
     }
 
     public List<Booking> getAllExemplarBooking (long vehicleExemplarId) {

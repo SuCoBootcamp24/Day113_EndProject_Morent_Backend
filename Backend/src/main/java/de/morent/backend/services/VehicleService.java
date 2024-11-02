@@ -176,14 +176,6 @@ public class VehicleService {
         return vehicleExemplarRepository.findAll(spec, pageable).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), startDate, endDate)).map(VehicleExemplarMapper::mapToDto).toList();
     }
 
-
-    private Boolean isAvailable(VehicleExemplar ex, LocalDate startDate, LocalDate endDate) {
-        List<Booking> bookingHistory = bookingService.getAllExemplarBooking(ex.getId());
-        return bookingHistory.stream().noneMatch(booking ->
-                booking.getPickUpDate().isBefore(endDate) &&
-                booking.getPlannedDropOffDate().isAfter(startDate));
-    }
-
     public VehicleExemplarDto findVehicleExemplarById(long id) {
         VehicleExemplar exemplar =vehicleExemplarRepository.findById(id).orElseThrow(() ->new EntityExistsException("VehicleExemplar not found"));
         return VehicleExemplarMapper.mapToDto(exemplar);
