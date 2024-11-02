@@ -111,18 +111,18 @@ public class UserService {
         if (!user.isAccountNonLocked()) throw new EntityNotFoundException("User was Deleted");
 
         Profile userProfile = user.getProfile();
-        userProfile.setFirstName(dto.firstName());
-        userProfile.setLastName(dto.lastName());
-        userProfile.setDateOfBirth(dto.birthDate());
-        userProfile.setPhoneNumber(dto.phoneNumber());
+        if (dto.firstName() != null && !dto.firstName().isEmpty()) userProfile.setFirstName(dto.firstName());
+        if (dto.lastName() != null && !dto.lastName().isEmpty()) userProfile.setLastName(dto.lastName());
+        if (dto.birthDate() != null) userProfile.setDateOfBirth(dto.birthDate());
+        if (dto.phoneNumber() != null && !dto.phoneNumber().isEmpty()) userProfile.setPhoneNumber(dto.phoneNumber());
 
         Address userAddress = userProfile.getAddress() != null ? userProfile.getAddress() : new Address();
-        userAddress.setStreet(dto.street());
-        userAddress.setHouseNumber(dto.houseNumber());
-        userAddress.setZipCode(dto.zipCode());
-        userAddress.setCity(dto.city());
-        userAddress.setCountry(dto.country());
-        userAddress = addressRepository.save(userAddress);
+
+        if (dto.street() != null && !dto.street().isEmpty()) userAddress.setStreet(dto.street());
+        if (dto.houseNumber() != null && !dto.houseNumber().isEmpty()) userAddress.setHouseNumber(dto.houseNumber());
+        if (dto.zipCode() != null && !dto.zipCode().isEmpty()) userAddress.setZipCode(dto.zipCode());
+        if (dto.city() != null && !dto.city().isEmpty()) userAddress.setCity(dto.city());
+        if (dto.country() != null && !dto.country().isEmpty()) userAddress.setCountry(dto.country());
 
         userProfile.setAddress(userAddress);
         userProfile = profileRepository.save(userProfile);
