@@ -28,12 +28,14 @@ public class BookingService {
     private UserService userService;
     private VehicleService vehicleService;
     private StoreService storeService;
+    private MailService mailService;
 
-    public BookingService(BookingRepository bookingRepository, UserService userService, @Lazy VehicleService vehicleService, @Lazy StoreService storeService) {
+    public BookingService(BookingRepository bookingRepository, UserService userService, @Lazy VehicleService vehicleService, @Lazy StoreService storeService, MailService mailService) {
         this.bookingRepository = bookingRepository;
         this.userService = userService;
         this.vehicleService = vehicleService;
         this.storeService = storeService;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -55,11 +57,13 @@ public class BookingService {
         newBooking.setPickUpLocation(pickUpStore);
         newBooking.setDropOffLocation(dropOfStore);
         newBooking.setTotalPrice(calculateTotalPrice(dto, vehicle));
-        if(dto.pickUpLocationId() != dto.dropOffLocationId()) newBooking.setDropOffDifferentStoreExtraCharge(true);
+        newBooking.setDropOffDifferentStoreExtraCharge(dto.pickUpLocationId() != dto.dropOffLocationId());
         newBooking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(newBooking);
 
-        return BookingMapper.mapToDto(newBooking);
+        BookingResponseDto booking = BookingMapper.mapToDto(newBooking);
+        mailService.sendBookingConfirmationEmail(user.getEmail(),booking);
+        return booking;
     }
 
     private void confirmBookingDataValidity(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
