@@ -46,12 +46,13 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
 
-
     // GET ALL BOOKING / EVEN JUST FROM A STORE - ADMIN
+    @GetMapping("/admin")
+    public ResponseEntity<List<BookingShortResponseDto>> getAllBookings(@RequestParam (required = false) long storeId, @RequestParam int pageNo, @RequestParam int recordSize) {
+        return ResponseEntity.ok(bookingService.getAllBookings(storeId, pageNo, recordSize));
+    }
 
-    // POST A NEW HANDOVER - RETURN A CAR - ADMIN
 
-    // GET ALL OLD DAMAGES ONE VEHICLE - ADMIN
 
 
 

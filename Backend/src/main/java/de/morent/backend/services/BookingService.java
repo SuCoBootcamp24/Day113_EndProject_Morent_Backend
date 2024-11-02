@@ -14,6 +14,9 @@ import de.morent.backend.repositories.BookingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +43,7 @@ public class BookingService {
         this.mailService = mailService;
     }
 
+    // POST NEW BOOKING - USER
     @Transactional
     public BookingResponseDto makeBooking(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
         confirmBookingDataValidity(dto, authentication);
@@ -119,14 +123,7 @@ public class BookingService {
         return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
     }
 
-    public List<Booking> getAllExemplarBooking (long vehicleExemplarId) {
-        return bookingRepository.findAllByVehicleId(vehicleExemplarId);
-    }
-
-    public List<Booking> getBookingsFromStore(long storeId) {
-        return bookingRepository.findAllByPickUpLocationId(storeId);
-    }
-
+    // GET ALL PERSONAL BOOKINGS - USER
     public List<BookingShortResponseDto> getAllPersonalBookings(Authentication authentication) {
         if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
@@ -136,6 +133,7 @@ public class BookingService {
                 .toList();
     }
 
+    // GET ONE PERSONAL BOOKING - USER
     public BookingResponseDto getPersonalBookingById(Long id, Authentication authentication) {
         if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
@@ -143,6 +141,7 @@ public class BookingService {
         return BookingMapper.mapToDto(booking);
     }
 
+    // CANCEL ONE BOOKING UP TO 24H BEFORE THE START DATE - USER
     public void cancelBooking(Long id, Authentication authentication) {
         if(!authentication.isAuthenticated()) throw new IllegalStateException("User not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
@@ -154,4 +153,21 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepository.save(booking);
     }
+
+    public List<Booking> getBookingsFromStore(long storeId) {
+        return bookingRepository.findAllByPickUpLocationId(storeId);
+    }
+    // ----------------  ADMINISTRATION
+
+    // GET ALL BOOKING / EVEN JUST FROM A STORE - ADMIN
+    public List<BookingShortResponseDto> getAllBookings(long storeId, int pageNo, int recordSize) {
+        Pageable pageable = PageRequest.of(pageNo, recordSize);
+        return bookingRepository.findAllByPickUpLocationId(storeId, pageable)
+               .stream()
+               .map(BookingMapper::mapToShortDto)
+               .toList();
+
+    }
+
+
 }

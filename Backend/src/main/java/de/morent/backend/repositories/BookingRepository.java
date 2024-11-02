@@ -1,6 +1,8 @@
 package de.morent.backend.repositories;
 
 import de.morent.backend.entities.Booking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +26,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                @Param("pickUpDate") LocalDate pickUpDate,
                                @Param("dropOffDate") LocalDate dropOffDate);
 
+
+    Page<Booking> findAllByPickUpLocationId(long pickUpLocationId, Pageable pageable);
 }
