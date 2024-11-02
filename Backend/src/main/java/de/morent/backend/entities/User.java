@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,32 +31,19 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @Column
     private boolean accountNonLocked = true;
 
-    @Column
+    @CreationTimestamp
     private LocalDateTime created;
 
-    @Column
+    @UpdateTimestamp
     private LocalDateTime updated;
 
     @OneToOne(cascade = {CascadeType.ALL})
     private Profile profile;
-
-    @PrePersist
-    private void onCreate(){
-        this.created = LocalDateTime.now();
-        this.updated= LocalDateTime.now();
-    }
-
-    @PreUpdate
-    private void onUpdate(){
-        this.updated = LocalDateTime.now();
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
