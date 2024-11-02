@@ -78,12 +78,12 @@ public class StoreService {
         if (stores.isEmpty()) return List.of();
         return stores.stream()
                 .map(store -> {
-                    double distance = geocodingService.calcDistance(
+                    double distance = Math.round(geocodingService.calcDistance(
                             city,
                             searchLocation,
                             store.getName(),
                             store.getAddress().getCoordinates()
-                            );
+                            ) * 100) / 100.0;
 
                     return new StoreShortDTO(
                             store.getId(),
