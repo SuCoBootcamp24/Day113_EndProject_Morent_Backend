@@ -38,24 +38,13 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDto makeBooking(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
+        confirmBookingDataValidity(dto, authentication);
 
-        // to implement yet:
-        // user is not locked
-        // User Profile not complete yet /maybe with an END request
-        // check if dates are not in the past
-        // if pick-up and drop-of are different, charge a fee
-
-        if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
         User user = userService.findUserByEmail(authentication.getName());
         checkUserProfileIfComplete(user);
         VehicleExemplar vehicle = vehicleService.findEntityVehicleExemplarById(dto.vehicleExemplarId());
         Store pickUpStore = storeService.findById(dto.pickUpLocationId());
         Store dropOfStore = storeService.findById(dto.dropOffLocationId());
-
-        // Check if vehicle exemplar is available
-        if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
-
-        BigDecimal totalPrice = calculateTotalPrice(vehicle.getPricePerDay(),dto.pickUpDate(), dto.planedDropOffDate());
 
         Booking newBooking = new Booking();
         newBooking.setUser(user);
@@ -65,11 +54,29 @@ public class BookingService {
         newBooking.setPlannedDropOffDate(dto.planedDropOffDate());
         newBooking.setPickUpLocation(pickUpStore);
         newBooking.setDropOffLocation(dropOfStore);
-        newBooking.setTotalPrice(totalPrice);
+        newBooking.setTotalPrice(calculateTotalPrice(dto, vehicle));
+        if(dto.pickUpLocationId() != dto.dropOffLocationId()) newBooking.setDropOffDifferentStoreExtraCharge(true);
         newBooking.setStatus(BookingStatus.CONFIRMED);
         bookingRepository.save(newBooking);
 
         return BookingMapper.mapToDto(newBooking);
+    }
+
+    private void confirmBookingDataValidity(BookingRequestDto dto, Authentication authentication) throws IllegalBookingException {
+        if(!authentication.isAuthenticated()) throw  new SecurityException("User is not authenticated");
+
+        if (dto.pickUpDate().isAfter(dto.planedDropOffDate()) || dto.pickUpDate().isBefore(LocalDate.now())) throw new IllegalBookingException("The dates are invalid");
+
+        if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
+    }
+
+    private BigDecimal calculateTotalPrice(BookingRequestDto dto, VehicleExemplar vehicle) {
+        BigDecimal totalPrice = calculateTotalPrice(vehicle.getPricePerDay(), dto.pickUpDate(), dto.planedDropOffDate());
+        // if pick-up and drop-of stores are different, charge a 150.00 € extra fee
+        if(dto.pickUpLocationId() != dto.dropOffLocationId()) {
+            totalPrice = totalPrice.add(BigDecimal.valueOf(150.00));
+        }
+        return totalPrice;
     }
 
 
@@ -99,7 +106,7 @@ public class BookingService {
         return pricePerDay.multiply(BigDecimal.valueOf(daysBetween));
     }
 
-    // Check availability vehicle
+    // Check availability vehicle and validity of dates
     public boolean autoIsAvailable(long autoId, LocalDate pickUpDate, LocalDate dropOffDate) {
         return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
     }

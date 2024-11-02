@@ -3,6 +3,8 @@ package de.morent.backend.entities;
 import de.morent.backend.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -42,6 +44,10 @@ public class Booking {
 
     @Column
     private BigDecimal totalPrice;
+
+    @Column
+    @ColumnDefault("false")
+    private Boolean dropOffDifferentStoreExtraCharge;
 
     @Column
     private boolean isActive;

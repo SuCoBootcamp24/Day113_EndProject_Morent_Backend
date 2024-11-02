@@ -22,6 +22,7 @@ public record BookingResponseDto(
         BookingStoreResponseDto dropOffLocation,
         BigDecimal pricePerDay,
         BigDecimal totalPrice,
+        boolean dropOffDifferentStoreExtraCharge,
         BookingStatus status
 ) {
 }
