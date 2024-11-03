@@ -1,5 +1,6 @@
 package de.morent.backend.controller;
 
+import de.morent.backend.dtos.bookings.GetInfoBeforeBookingDto;
 import de.morent.backend.dtos.bookings.BookingRequestDto;
 import de.morent.backend.dtos.bookings.BookingResponseDto;
 import de.morent.backend.dtos.bookings.BookingShortResponseDto;
@@ -25,6 +26,12 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<BookingResponseDto> makeBooking(Authentication authentication, @RequestBody BookingRequestDto dto) throws IllegalBookingException {
         return ResponseEntity.ok(bookingService.makeBooking(dto, authentication));
+    }
+
+    // GET INFORMATION FOR BOOKING AN AUTO - USER
+    @PostMapping("/info")
+    public ResponseEntity<GetInfoBeforeBookingDto> getBookingInfo(@RequestBody BookingRequestDto dto) throws IllegalBookingException {
+        return ResponseEntity.ok(bookingService.getBookingInfo(dto));
     }
 
     // GET ALL PERSONAL BOOKINGS - USER

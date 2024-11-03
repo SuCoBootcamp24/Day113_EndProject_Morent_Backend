@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Data
@@ -73,5 +74,9 @@ public class Booking {
     @PreUpdate
     public void onUpdate(){
         this.updated = LocalDateTime.now();
+    }
+
+    public int getTotalDays() {
+        return (int) ChronoUnit.DAYS.between(pickUpDate, plannedDropOffDate);
     }
 }

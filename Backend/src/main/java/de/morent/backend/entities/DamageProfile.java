@@ -16,7 +16,7 @@ public class DamageProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToMany(mappedBy = "damageProfile")
+    @OneToMany
     private List<Damage> damages = new ArrayList<>();
 
     @Column
