@@ -11,6 +11,7 @@ public class UserMapper {
         return new UserProfileResponseDTO(
                 userProfile.getFirstName(),
                 userProfile.getLastName(),
+                userProfile.getDateOfBirth(),
                 userProfile.getPhoneNumber(),
                 userProfile.getImage().getImageUrl(),
                 AddressMapper.toDTO(userProfile.getAddress())
