@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 
 public class BookingMapper {
     public static BookingResponseDto mapToDto(Booking newBooking) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
         AddressDTO pickUpAddress = new AddressDTO(
                 newBooking.getPickUpLocation().getAddress().getStreet(),
@@ -45,7 +45,7 @@ public class BookingMapper {
         return new BookingResponseDto(
                 newBooking.getId(),
                 newBooking.getBookingNumber(),
-                newBooking.getCreated().format(formatter),
+                newBooking.getCreated().format(dateTimeFormatter),
                 newBooking.getUser().getProfile().getFirstName(),
                 newBooking.getUser().getProfile().getLastName(),
                 newBooking.getUser().getProfile().getDateOfBirth(),
@@ -65,9 +65,11 @@ public class BookingMapper {
 
     public static BookingShortResponseDto mapToShortDto(Booking booking) {
         return new BookingShortResponseDto(
+                booking.getId(),
                 booking.getBookingNumber(),
                 booking.getUser().getProfile().getFirstName(),
                 booking.getUser().getProfile().getLastName(),
+                booking.getUser().getProfile().getDateOfBirth(),
                 booking.getPickUpLocation().getName(),
                 booking.getPickUpLocation().getAddress().getCity(),
                 booking.getDropOffLocation().getName(),

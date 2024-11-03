@@ -12,11 +12,13 @@ import de.morent.backend.enums.BookingStatus;
 import de.morent.backend.exceptions.IllegalBookingException;
 import de.morent.backend.mappers.BookingMapper;
 import de.morent.backend.repositories.BookingRepository;
+import de.morent.backend.specifications.BookingSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -198,5 +201,15 @@ public class BookingService {
         return bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking with id: " + bookingId + " found"));
     }
 
+    //GET ALL BOOKINGS BY BOOKING NUMBER, FIRSTNAME AND LASTNAME
+    public List<BookingShortResponseDto> getBookingsBySearchCriteria(String bookingNumber, String firstName, String lastName) {
 
+        Specification<Booking> spec = Specification
+                .where(BookingSpecification.bookingNumberLike(bookingNumber))
+                .and(BookingSpecification.firstNameLike(firstName))
+                .and(BookingSpecification.lastNameLike(lastName));
+
+        return bookingRepository.findAll(spec).stream().map(BookingMapper::mapToShortDto).toList();
+
+    }
 }
