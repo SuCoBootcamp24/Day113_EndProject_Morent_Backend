@@ -40,4 +40,9 @@ public class NewsService {
         if (existingNewsCustomer.isEmpty()) return;
         newsRepository.delete(existingNewsCustomer.get());
     }
+
+    public Boolean getNewsletterRegisteredStatus(String email) {
+        Optional<Newsletter> existingNewsCustomer = getCustomerByEmail(email);
+        return existingNewsCustomer.isPresent();
+    }
 }

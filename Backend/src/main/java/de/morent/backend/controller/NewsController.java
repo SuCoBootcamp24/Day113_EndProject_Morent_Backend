@@ -1,6 +1,7 @@
 package de.morent.backend.controller;
 
 import de.morent.backend.services.NewsService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,12 @@ public class NewsController {
     }
 
 
+
+    @GetMapping
+    public ResponseEntity<Boolean> GetNewsletterRegisteredStatus(@RequestParam String email) {
+        return new ResponseEntity<>(newsService.getNewsletterRegisteredStatus(email), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Void> addToNewsletter(
                             @RequestParam String firstName,
@@ -25,7 +32,7 @@ public class NewsController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping()
+    @DeleteMapping
     public ResponseEntity<Void> deleteAllNewsletters(@RequestParam String email) {
         newsService.deleteFromNewsletter(email);
         return ResponseEntity.ok().build();
