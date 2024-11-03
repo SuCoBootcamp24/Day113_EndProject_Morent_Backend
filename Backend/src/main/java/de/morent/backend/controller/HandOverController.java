@@ -2,7 +2,6 @@ package de.morent.backend.controller;
 
 import de.morent.backend.dtos.bookings.HandOverConfirmationDto;
 import de.morent.backend.dtos.bookings.HandOverDto;
-import de.morent.backend.services.BookingService;
 import de.morent.backend.services.HandOverService;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,4 +23,5 @@ public class HandOverController {
     }
 
     // GET ALL OLD DAMAGES ONE VEHICLE - ADMIN
+
 }

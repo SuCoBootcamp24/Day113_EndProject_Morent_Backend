@@ -7,8 +7,11 @@ import de.morent.backend.dtos.store.BookingStoreResponseDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.entities.Booking;
 
+import java.time.format.DateTimeFormatter;
+
 public class BookingMapper {
     public static BookingResponseDto mapToDto(Booking newBooking) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
         AddressDTO pickUpAddress = new AddressDTO(
                 newBooking.getPickUpLocation().getAddress().getStreet(),
@@ -42,7 +45,7 @@ public class BookingMapper {
         return new BookingResponseDto(
                 newBooking.getId(),
                 newBooking.getBookingNumber(),
-                newBooking.getCreated(),
+                newBooking.getCreated().format(formatter),
                 newBooking.getUser().getProfile().getFirstName(),
                 newBooking.getUser().getProfile().getLastName(),
                 newBooking.getUser().getProfile().getDateOfBirth(),
@@ -52,6 +55,7 @@ public class BookingMapper {
                 pickUpStore,
                 dropOffStore,
                 newBooking.getVehicle().getPricePerDay(),
+                newBooking.getTotalDays(),
                 newBooking.getTotalPrice(),
                 newBooking.getDropOffDifferentStoreExtraCharge(),
                 newBooking.getStatus()

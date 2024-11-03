@@ -6,6 +6,6 @@ public record HandOverConfirmationDto(
         BookingShortResponseDto bookingData,
         int newMileage,
         boolean isTankFull,
-        List<DamageDto> newDamages
+        List<NewDamageDto> newDamages
 ) {
 }

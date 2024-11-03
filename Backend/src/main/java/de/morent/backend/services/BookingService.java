@@ -68,7 +68,7 @@ public class BookingService {
         bookingRepository.save(newBooking);
 
         BookingResponseDto booking = BookingMapper.mapToDto(newBooking);
-        // mailService.sendBookingConfirmationEmail(user.getEmail(),booking);
+        mailService.sendBookingConfirmationEmail(user.getEmail(),booking);
         return booking;
     }
 

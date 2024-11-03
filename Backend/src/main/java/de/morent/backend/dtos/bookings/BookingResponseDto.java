@@ -6,12 +6,11 @@ import de.morent.backend.enums.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public record BookingResponseDto(
         Long id,
         String bookingNumber,
-        LocalDateTime bookingDate,
+        String bookingDate,
         String userFirstName,
         String userLastName,
         LocalDate dateOfBirth,
@@ -21,6 +20,7 @@ public record BookingResponseDto(
         BookingStoreResponseDto pickUpLocation,
         BookingStoreResponseDto dropOffLocation,
         BigDecimal pricePerDay,
+        int totalDays,
         BigDecimal totalPrice,
         boolean dropOffDifferentStoreExtraCharge,
         BookingStatus status

@@ -6,6 +6,6 @@ public record HandOverDto(
         long bookingId,
         int newMileage,
         boolean isTankFull,
-        List<DamageDto> newDamages
+        List<NewDamageDto> newDamages
 ) {
 }
