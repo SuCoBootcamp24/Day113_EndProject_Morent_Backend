@@ -59,7 +59,11 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getAllBookings(storeId, pageNo, recordSize));
     }
 
-
+    //GET ALL BOOKINGS BY BOOKING NUMBER, FIRSTNAME AND LASTNAME
+    @GetMapping("/admin/search")
+    public ResponseEntity<List<BookingShortResponseDto>> getBookingsBySearchCriteria(@RequestParam (required = false) String bookingNumber, @RequestParam (required = false) String firstName, @RequestParam (required = false) String lastName) {
+        return ResponseEntity.ok(bookingService.getBookingsBySearchCriteria(bookingNumber, firstName, lastName));
+    }
 
 
 
