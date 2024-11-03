@@ -66,7 +66,10 @@ public class BookingMapper {
                 booking.getUser().getProfile().getLastName(),
                 booking.getPickUpLocation().getName(),
                 booking.getPickUpLocation().getAddress().getCity(),
+                booking.getDropOffLocation().getName(),
+                booking.getDropOffLocation().getAddress().getCity(),
                 booking.getPickUpDate(),
+                booking.getPlannedDropOffDate(),
                 booking.getStatus(),
                 booking.getTotalPrice()
                 );

@@ -9,25 +9,25 @@ import de.morent.backend.entities.DamageProfile;
 import de.morent.backend.entities.Handover;
 import de.morent.backend.enums.BookingStatus;
 import de.morent.backend.mappers.BookingMapper;
+import de.morent.backend.repositories.DamageRepository;
 import de.morent.backend.repositories.HandoverRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class HandOverService {
 
     private HandoverRepository handoverRepository;
     private BookingService bookingService;
+    private DamageRepository damageRepository;
 
-    public HandOverService(HandoverRepository handoverRepository, BookingService bookingService) {
+    public HandOverService(HandoverRepository handoverRepository, BookingService bookingService, DamageRepository damageRepository) {
         this.handoverRepository = handoverRepository;
         this.bookingService = bookingService;
+        this.damageRepository = damageRepository;
     }
 
     @Transactional
@@ -43,6 +43,7 @@ public class HandOverService {
                     damage.setDamageDescription(damageDto.description());
                     damage.setCreated(damageDto.createdAt());
                     damage.setRepaired(false);
+                    damageRepository.save(damage);
                     return damage;
                 }).toList();
 
@@ -54,11 +55,10 @@ public class HandOverService {
         handover.setTankFull(dto.isTankFull());
         handover.setDamages(newDamages);
 
-        handoverRepository.save(handover);
-        BookingShortResponseDto bookingDto = BookingMapper.mapToShortDto(booking);
-
         booking.setHandover(handover);
         booking.setStatus(BookingStatus.IN_REVIEW);
+        BookingShortResponseDto bookingDto = BookingMapper.mapToShortDto(booking);
+        handoverRepository.save(handover);
 
         return new HandOverConfirmationDto(
                 bookingDto,

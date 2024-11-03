@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/handover")
 public class HandOverController {
 
-    private BookingService bookingService;
     private HandOverService handOverService;
+
+    public HandOverController(HandOverService handOverService) {
+        this.handOverService = handOverService;
+    }
 
     // ------- JUST FOR ADMINISTRATION
     // POST A NEW HANDOVER - RETURN A CAR - ADMIN

@@ -13,7 +13,10 @@ public record BookingShortResponseDto(
         String userLastName,
         String storeName,
         String storeCity,
+        String dropOffStoreName,
+        String dropOffStoreCity,
         LocalDate pickUpDate,
+        LocalDate dropOffDate,
         BookingStatus status,
         BigDecimal totalPrice
 ) {
