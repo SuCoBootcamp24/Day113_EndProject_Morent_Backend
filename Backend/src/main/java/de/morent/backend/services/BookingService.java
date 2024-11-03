@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.dtos.bookings.GetInfoBeforeBookingDto;
 import de.morent.backend.dtos.bookings.BookingRequestDto;
 import de.morent.backend.dtos.bookings.BookingResponseDto;
 import de.morent.backend.dtos.bookings.BookingShortResponseDto;
@@ -14,7 +15,6 @@ import de.morent.backend.repositories.BookingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -83,14 +83,14 @@ public class BookingService {
     }
 
     private BigDecimal calculateTotalPrice(BookingRequestDto dto, VehicleExemplar vehicle) {
-        BigDecimal totalPrice = calculateTotalPrice(vehicle.getPricePerDay(), dto.pickUpDate(), dto.planedDropOffDate());
+        long daysBetween = ChronoUnit.DAYS.between(dto.pickUpDate(), dto.planedDropOffDate());
+        BigDecimal totalPrice = vehicle.getPricePerDay().multiply(BigDecimal.valueOf(daysBetween));
         // if pick-up and drop-of stores are different, charge a 150.00 € extra fee
         if(dto.pickUpLocationId() != dto.dropOffLocationId()) {
             totalPrice = totalPrice.add(BigDecimal.valueOf(150.00));
         }
         return totalPrice;
     }
-
 
     private void checkUserProfileIfComplete(User user) throws IllegalBookingException {
         StringBuilder errorMessage = new StringBuilder("Bitte vervollständigen Sie zuerst Ihr Profil. Folgende Angaben fehlen: ");
@@ -113,14 +113,37 @@ public class BookingService {
         return UUID.randomUUID().toString().toUpperCase().substring(0, 16);
     }
 
-    private BigDecimal calculateTotalPrice(BigDecimal pricePerDay, LocalDate localDate, LocalDate localDate1) {
-        long daysBetween = ChronoUnit.DAYS.between(localDate, localDate1);
-        return pricePerDay.multiply(BigDecimal.valueOf(daysBetween));
-    }
 
     // Check availability vehicle and validity of dates
     public boolean autoIsAvailable(long autoId, LocalDate pickUpDate, LocalDate dropOffDate) {
         return bookingRepository.isVehicleAvailable(autoId, pickUpDate, dropOffDate);
+    }
+
+    // GET INFORMATION FOR BOOKING AN AUTO - USER
+    public GetInfoBeforeBookingDto getBookingInfo(BookingRequestDto dto) throws IllegalBookingException {
+        if (dto.pickUpDate().isAfter(dto.planedDropOffDate()) || dto.pickUpDate().isBefore(LocalDate.now())) throw new IllegalBookingException("The dates are invalid");
+        if (!autoIsAvailable(dto.vehicleExemplarId(), dto.pickUpDate(), dto.planedDropOffDate())) throw new IllegalArgumentException("Vehicle is not available for the given dates");
+        VehicleExemplar vehicle = vehicleService.findEntityVehicleExemplarById(dto.vehicleExemplarId());
+        Store pickUpStore = storeService.findById(dto.pickUpLocationId());
+        Store dropOfStore = storeService.findById(dto.dropOffLocationId());
+
+        boolean hasExtraChargeChangingLocation = dto.pickUpLocationId() != dto.dropOffLocationId();
+
+
+        return new GetInfoBeforeBookingDto(
+                pickUpStore.getName(),
+                pickUpStore.getAddress().getCity(),
+                dropOfStore.getName(),
+                dropOfStore.getAddress().getCity(),
+                dto.pickUpDate(),
+                dto.planedDropOffDate(),
+                ChronoUnit.DAYS.between(dto.pickUpDate(), dto.planedDropOffDate()),
+                vehicle.getPricePerDay(),
+                hasExtraChargeChangingLocation,
+                BigDecimal.valueOf(150.00),
+                calculateTotalPrice(dto, vehicle)
+
+        );
     }
 
     // GET ALL PERSONAL BOOKINGS - USER
@@ -174,4 +197,6 @@ public class BookingService {
     public Booking getBookingById(long bookingId) {
         return bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException("Booking with id: " + bookingId + " found"));
     }
+
+
 }
