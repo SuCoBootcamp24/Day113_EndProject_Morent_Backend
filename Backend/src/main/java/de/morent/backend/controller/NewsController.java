@@ -24,9 +24,9 @@ public class NewsController {
 
     @PostMapping
     public ResponseEntity<Void> addToNewsletter(
+                            @RequestParam String email,
                             @RequestParam String firstName,
                             @RequestParam String lastName,
-                            @RequestParam String email,
                             @RequestParam(required = false) boolean isRegistered) {
         newsService.addToNewsletter(firstName, lastName, email, isRegistered);
         return ResponseEntity.ok().build();

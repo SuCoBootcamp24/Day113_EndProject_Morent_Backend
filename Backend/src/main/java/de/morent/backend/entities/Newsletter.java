@@ -1,6 +1,7 @@
 package de.morent.backend.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 @Entity
@@ -8,15 +9,12 @@ import lombok.Data;
 public class Newsletter {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    @Email
+    String email;
 
     String firstName;
 
     String lastName;
-
-    @Column(unique = true)
-    String email;
 
     boolean isRegistered = false;
 }
