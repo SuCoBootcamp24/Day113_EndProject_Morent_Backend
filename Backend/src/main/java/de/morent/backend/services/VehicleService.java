@@ -225,4 +225,8 @@ public class VehicleService {
             fuelTypes
         );
     }
+
+    public VehicleExemplar findExemplarById(long exemplarId) {
+        return vehicleExemplarRepository.findById(exemplarId).orElseThrow(() -> new EntityNotFoundException("VehicleExemplar not found"));
+    }
 }

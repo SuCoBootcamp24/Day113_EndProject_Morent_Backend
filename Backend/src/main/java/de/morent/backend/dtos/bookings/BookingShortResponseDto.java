@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 public record BookingShortResponseDto(
         long bookingId,
+        long vehicleId,
         String bookingNumber,
         String userFirstName,
         String userLastName,

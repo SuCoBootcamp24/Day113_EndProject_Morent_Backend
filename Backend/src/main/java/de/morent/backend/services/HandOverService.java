@@ -1,6 +1,7 @@
 package de.morent.backend.services;
 
 import de.morent.backend.dtos.bookings.BookingShortResponseDto;
+import de.morent.backend.dtos.bookings.DamageDto;
 import de.morent.backend.dtos.bookings.HandOverConfirmationDto;
 import de.morent.backend.dtos.bookings.HandOverDto;
 import de.morent.backend.entities.*;
@@ -9,6 +10,7 @@ import de.morent.backend.mappers.BookingMapper;
 import de.morent.backend.repositories.DamageRepository;
 import de.morent.backend.repositories.HandoverRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,12 +23,14 @@ public class HandOverService {
     private BookingService bookingService;
     private DamageRepository damageRepository;
     private MailService mailService;
+    private VehicleService vehicleService;
 
-    public HandOverService(HandoverRepository handoverRepository, BookingService bookingService, DamageRepository damageRepository, MailService mailService) {
+    public HandOverService(HandoverRepository handoverRepository, BookingService bookingService, DamageRepository damageRepository, MailService mailService, @Lazy VehicleService vehicleService) {
         this.handoverRepository = handoverRepository;
         this.bookingService = bookingService;
         this.damageRepository = damageRepository;
         this.mailService = mailService;
+        this.vehicleService = vehicleService;
     }
 
     @Transactional
@@ -56,7 +60,7 @@ public class HandOverService {
         handover.setDamages(newDamages);
 
         booking.setHandover(handover);
-        booking.setStatus(BookingStatus.IN_REVIEW);
+        booking.setStatus(BookingStatus.COMPLETED);
         BookingShortResponseDto bookingDto = BookingMapper.mapToShortDto(booking);
         handoverRepository.save(handover);
 
@@ -72,5 +76,18 @@ public class HandOverService {
                 dto.newMileage(),
                 dto.isTankFull(),
                 dto.newDamages());
+    }
+
+    // ADMIN - GET AUTO OLD DAMAGES
+    public List<DamageDto> getOldDamages(Long vehicleId) {
+        VehicleExemplar vehicle = vehicleService.findExemplarById(vehicleId);
+        List<Damage> damages = vehicle.getDamageProfile().getDamages();
+
+        return damages.stream().map(damage -> new DamageDto(
+                damage.getDamagePosition(),
+                damage.getDamageDescription(),
+                damage.getCreated(),
+                damage.isRepaired()
+        )).toList();
     }
 }
