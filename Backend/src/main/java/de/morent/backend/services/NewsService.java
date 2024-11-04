@@ -34,4 +34,15 @@ public class NewsService {
     private Optional<Newsletter> getCustomerByEmail(String email) {
         return newsRepository.findByEmail(email);
     }
+
+    public void deleteFromNewsletter(String email) {
+        Optional<Newsletter> existingNewsCustomer = getCustomerByEmail(email);
+        if (existingNewsCustomer.isEmpty()) return;
+        newsRepository.delete(existingNewsCustomer.get());
+    }
+
+    public Boolean getNewsletterRegisteredStatus(String email) {
+        Optional<Newsletter> existingNewsCustomer = getCustomerByEmail(email);
+        return existingNewsCustomer.isPresent();
+    }
 }
