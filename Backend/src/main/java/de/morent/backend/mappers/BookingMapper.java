@@ -19,7 +19,8 @@ public class BookingMapper {
                 newBooking.getPickUpLocation().getAddress().getCity(),
                 newBooking.getPickUpLocation().getAddress().getCountry(),
                 newBooking.getPickUpLocation().getAddress().getCoordinates(),
-                newBooking.getPickUpLocation().getAddress().getZipCode()
+                newBooking.getPickUpLocation().getAddress().getZipCode(),
+                true
         );
         AddressDTO dropOffAddress = new AddressDTO(
                 newBooking.getDropOffLocation().getAddress().getStreet(),
@@ -27,7 +28,8 @@ public class BookingMapper {
                 newBooking.getDropOffLocation().getAddress().getCity(),
                 newBooking.getDropOffLocation().getAddress().getCountry(),
                 newBooking.getDropOffLocation().getAddress().getCoordinates(),
-                newBooking.getDropOffLocation().getAddress().getZipCode()
+                newBooking.getDropOffLocation().getAddress().getZipCode(),
+                true
         );
 
         VehicleDTO vehicleDto = VehicleMapper.mapToDto(newBooking.getVehicle().getVehicle());

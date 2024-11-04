@@ -12,6 +12,7 @@ public record UserDetailsDTO(
         LocalDate birthDate,
         String phoneNumber,
         AddressDTO address,
+        boolean addressIsNotCustomized,
         String profilePictureUrl,
         LocalDateTime createdDate,
         LocalDateTime updatedDate

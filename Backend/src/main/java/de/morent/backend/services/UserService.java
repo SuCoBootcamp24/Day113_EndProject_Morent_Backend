@@ -28,13 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class UserService {
 
     private UserRepository userRepository;
     private ProfileRepository profileRepository;
+    private AddressRepository addressRepository;
+    private GeocodingService geocodingService;
     private ImagesService imagesService;
     private AuthService authService;
     private PasswordEncoder passwordEncoder;
@@ -42,9 +43,11 @@ public class UserService {
     private RedisService redisService;
     private TokenService tokenService;
 
-    public UserService(UserRepository userRepository, ProfileRepository profileRepository, ImagesService imagesService, AuthService authService, PasswordEncoder passwordEncoder, VerifyService verifyService, RedisService redisService, TokenService tokenService) {
+    public UserService(UserRepository userRepository, ProfileRepository profileRepository, AddressRepository addressRepository, GeocodingService geocodingService, ImagesService imagesService, AuthService authService, PasswordEncoder passwordEncoder, VerifyService verifyService, RedisService redisService, TokenService tokenService) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
+        this.addressRepository = addressRepository;
+        this.geocodingService = geocodingService;
         this.imagesService = imagesService;
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
@@ -78,10 +81,22 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         profile.setFirstName(dto.firstName());
         profile.setLastName(dto.lastName());
+        profile.setAddress(CreateEmptyAddress());
         user.setRole(UserRole.USER);
         user.setProfile(profile);
         userRepository.save(user);
         verifyService.sendVerifyMail(user.getEmail());
+    }
+
+    private Address CreateEmptyAddress() {
+        Address address = new Address();
+        address.setStreet("Unbekannt");
+        address.setHouseNumber("Unbekannt");
+        address.setZipCode("Unbekannt");
+        address.setCity("Unbekannt");
+        address.setCountry("Unbekannt");
+        address = addressRepository.save(address);
+        return address;
     }
 
     public AuthResponseDTO unlockAccount(String verifyCode) {
@@ -121,13 +136,16 @@ public class UserService {
         if (dto.birthDate() != null) userProfile.setDateOfBirth(dto.birthDate());
         if (dto.phoneNumber() != null && !dto.phoneNumber().isEmpty()) userProfile.setPhoneNumber(dto.phoneNumber());
 
-        Address userAddress = userProfile.getAddress() != null ? userProfile.getAddress() : new Address();
+        Address userAddress = userProfile.getAddress();
 
         if (dto.street() != null && !dto.street().isEmpty()) userAddress.setStreet(dto.street());
         if (dto.houseNumber() != null && !dto.houseNumber().isEmpty()) userAddress.setHouseNumber(dto.houseNumber());
         if (dto.zipCode() != null && !dto.zipCode().isEmpty()) userAddress.setZipCode(dto.zipCode());
         if (dto.city() != null && !dto.city().isEmpty()) userAddress.setCity(dto.city());
         if (dto.country() != null && !dto.country().isEmpty()) userAddress.setCountry(dto.country());
+        addressRepository.save(userAddress);
+
+        if (geocodingService.convertAddressToCoordinates(userAddress).length() > 3) userAddress.setRealUserAddress(true);
 
         userProfile.setAddress(userAddress);
         userProfile = profileRepository.save(userProfile);

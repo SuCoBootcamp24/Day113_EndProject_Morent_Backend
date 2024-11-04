@@ -26,6 +26,7 @@ public class UserMapper {
                 user.getProfile().getDateOfBirth(),
                 user.getProfile().getPhoneNumber(),
                 AddressMapper.toDTO(user.getProfile().getAddress()),
+                user.getProfile().getAddress().isRealUserAddress(),
                 user.getProfile().getImage().getImageUrl(),
                 user.getCreated(),
                 user.getUpdated()

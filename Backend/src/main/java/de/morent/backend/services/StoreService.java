@@ -48,7 +48,7 @@ public class StoreService {
         newAddress.setZipCode(VowelConverter.convertString(dto.zipCode()));
         newAddress.setCity(VowelConverter.convertString(dto.city()));
         newAddress.setCountry(VowelConverter.convertString(dto.country()));
-        newAddress.setCoordinates(geocodingService.convertAddToCoords(newAddress));
+        newAddress.setCoordinates(geocodingService.convertAddressToCoordinates(newAddress));
 
         newStore.setAddress(newAddress);
 
