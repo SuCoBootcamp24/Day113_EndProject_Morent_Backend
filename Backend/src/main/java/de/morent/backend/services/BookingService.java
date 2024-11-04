@@ -202,12 +202,13 @@ public class BookingService {
     }
 
     //GET ALL BOOKINGS BY BOOKING NUMBER, FIRSTNAME AND LASTNAME
-    public List<BookingShortResponseDto> getBookingsBySearchCriteria(String bookingNumber, String firstName, String lastName) {
+    public List<BookingShortResponseDto> getBookingsBySearchCriteria(String bookingNumber, String firstName, String lastName, Long storeId) {
 
         Specification<Booking> spec = Specification
                 .where(BookingSpecification.bookingNumberLike(bookingNumber))
                 .and(BookingSpecification.firstNameLike(firstName))
-                .and(BookingSpecification.lastNameLike(lastName));
+                .and(BookingSpecification.lastNameLike(lastName))
+                .and(BookingSpecification.storeIdLike(storeId));
 
         return bookingRepository.findAll(spec).stream().map(BookingMapper::mapToShortDto).toList();
 

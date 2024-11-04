@@ -13,6 +13,15 @@ public class BookingSpecification {
         };
     }
 
+    public static Specification<Booking> storeIdLike(Long storeId) {
+        return (root, query, criteriaBuilder) -> {
+            if (storeId != null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.like(criteriaBuilder.lower(root.join("pickUpLocation").get("id")), "%" + storeId + "%");
+        };
+    }
+
     public static Specification<Booking> firstNameLike(String firstName) {
         return (root, query, criteriaBuilder) -> {
             if (firstName == null || firstName.isEmpty()) {
@@ -30,4 +39,6 @@ public class BookingSpecification {
             return criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + lastName.toLowerCase() + "%");
         };
     }
+
+
 }
