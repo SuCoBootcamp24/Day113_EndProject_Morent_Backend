@@ -6,6 +6,7 @@ public record AddressDTO(
         String zipCode,
         String city,
         String country,
-        String coordinates
+        String coordinates,
+        boolean isRealUserAddress
 ) {
 }

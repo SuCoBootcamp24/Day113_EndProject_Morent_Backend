@@ -14,7 +14,8 @@ public class AddressMapper {
                 address.getZipCode(),
                 address.getCity(),
                 address.getCountry(),
-                address.getCoordinates()
+                address.getCoordinates(),
+                address.isRealUserAddress()
         );
     }
 }
