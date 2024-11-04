@@ -1,5 +1,7 @@
 package de.morent.backend.dtos.vehicle;
 
+import de.morent.backend.dtos.bookings.DamageDto;
+import de.morent.backend.entities.Damage;
 import de.morent.backend.entities.Review;
 
 import java.math.BigDecimal;
@@ -13,7 +15,7 @@ public record VehicleExemplarDto(
         int mileage,
         String status,
         LocalDate createAt,
-        int Damages,
+        List<DamageDto> Damages,
         int ConstYear
 ) {
 }

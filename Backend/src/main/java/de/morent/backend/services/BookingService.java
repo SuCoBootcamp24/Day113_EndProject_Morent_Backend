@@ -213,4 +213,8 @@ public class BookingService {
         return bookingRepository.findAll(spec).stream().map(BookingMapper::mapToShortDto).toList();
 
     }
+
+    public BookingShortResponseDto getShortBookingById(Long id) {
+        return bookingRepository.findById(id).map(BookingMapper::mapToShortDto).orElseThrow(() -> new EntityNotFoundException("Booking with id: " + id + " not found"));
+    }
 }

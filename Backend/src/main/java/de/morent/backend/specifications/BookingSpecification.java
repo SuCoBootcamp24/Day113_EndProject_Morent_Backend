@@ -15,7 +15,7 @@ public class BookingSpecification {
 
     public static Specification<Booking> storeIdLike(Long storeId) {
         return (root, query, criteriaBuilder) -> {
-            if (storeId != null) {
+            if (storeId != null ||  storeId == 0) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.like(criteriaBuilder.lower(root.join("pickUpLocation").get("id")), "%" + storeId + "%");

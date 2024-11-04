@@ -68,6 +68,7 @@ public class BookingMapper {
     public static BookingShortResponseDto mapToShortDto(Booking booking) {
         return new BookingShortResponseDto(
                 booking.getId(),
+                booking.getVehicle().getId(),
                 booking.getBookingNumber(),
                 booking.getUser().getProfile().getFirstName(),
                 booking.getUser().getProfile().getLastName(),

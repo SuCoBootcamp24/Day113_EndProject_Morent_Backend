@@ -70,7 +70,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingsBySearchCriteria(bookingNumber, firstName, lastName, storeId));
     }
 
-
-
-
+    // GET ONE BOOKING BY ID - ADMIN
+    @GetMapping("/admin/{bookingId}")
+    public ResponseEntity<BookingShortResponseDto> getBookingById(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(bookingService.getShortBookingById(bookingId));
+    }
 }
+
+
+
