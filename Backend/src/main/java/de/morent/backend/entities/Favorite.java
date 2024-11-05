@@ -18,6 +18,6 @@ public class Favorite {
     private User user;
 
     @OneToMany
-    @JoinColumn(name ="favorite_id")
+    @JoinColumn(name = "vehicle_id")
     private List<Vehicle> vehicle;
 }
