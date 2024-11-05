@@ -148,8 +148,7 @@ public class VehicleService {
         return exemplars.stream().map(VehicleExemplarMapper::mapToDto).toList();
     }
 
-    public List<VehicleExemplarDto> getFilteredCars(FilteringDto dto, int pageNo, int recordCount) {
-        Pageable pageable = PageRequest.of(pageNo, recordCount);
+    public List<VehicleExemplarDto> getFilteredCars(FilteringDto dto) {
         long storeId = dto.storeId();
         List<CarType> carType = dto.carType();
         List<FuelType> fuelType = dto.fuelType();
@@ -172,7 +171,7 @@ public class VehicleService {
             spec = spec.and(VehicleSpecification.seatsCount(seats));
 
 
-        return vehicleExemplarRepository.findAll(spec, pageable).stream()
+        return vehicleExemplarRepository.findAll(spec).stream()
                 .filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), startDate, endDate))
                 .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
                 .values().stream()
