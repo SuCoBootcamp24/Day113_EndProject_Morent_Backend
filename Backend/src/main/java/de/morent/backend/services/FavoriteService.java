@@ -35,7 +35,8 @@ public class FavoriteService {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()->new EntityNotFoundException("User not found"));
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(()->new EntityNotFoundException("Vehicle not found"));
 
-       Optional<Favorite> existingFavorite = favoriteRepository.findByUserIdAndVehicleId(user.getId(), vehicle.getId());
+        System.out.println(vehicle);
+       Optional<Favorite> existingFavorite = favoriteRepository.findByUserIdAndVehicleId(user.getId(), vehicleId);
 
        if(existingFavorite.isPresent()) {
            favoriteRepository.delete(existingFavorite.get());
@@ -49,7 +50,8 @@ public class FavoriteService {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()->new EntityNotFoundException("User not found"));
         List<Favorite> favoriteList = favoriteRepository.findAllByUserId(user.getId()).orElseThrow(()-> new NoSuchElementException("User has not a favorites"));
         List<FavoriteDto> favoriteDtoList = favoriteList.stream().map(favorite ->
-                new FavoriteDto(favorite.getId())).toList();
+                new FavoriteDto(favorite.getVehicle().getId())).toList();
         return new FavoritesResponseDto(user.getId(), favoriteDtoList);
     }
+
 }
