@@ -69,8 +69,8 @@ public class VehicleController {
 
     //GET / Get all Vehicle-Exemplar / Get all Vehicle-Exemplar in one Store
     @PostMapping("/exemplars")
-    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(@RequestBody FilteringDto dto, @RequestParam int pageNo, @RequestParam (defaultValue = "10") int recordCount) {
-        return ResponseEntity.ok(vehicleService.getFilteredCars(dto, pageNo, recordCount));
+    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(@RequestBody FilteringDto dto,) {
+        return ResponseEntity.ok(vehicleService.getFilteredCars(dto));
     }
 
     //GET / one Vehicle-Exemplar
