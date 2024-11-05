@@ -25,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -176,6 +173,7 @@ public class VehicleService {
                 .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
                 .values().stream()
                 .map(List::getFirst)
+                .sorted(Comparator.comparing(VehicleExemplar::getPricePerDay))
                 .map(VehicleExemplarMapper::mapToDto).toList();
     }
 
@@ -192,7 +190,11 @@ public class VehicleService {
         long storeId = dto.storeId();
 
         // Retrieve a list of available vehicle exemplars for the specified store ID and filter them by availability within the given date range.
-        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), dto.startDate(), dto.endDate())).toList();
+        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream()
+                .filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), dto.startDate(), dto.endDate()))
+                .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
+                .values().stream()
+                .map(List::getFirst).toList();
 
         // Count the number of vehicle exemplars by fuel type and car type, storing the results in separate maps.
         Map<FuelType, Long> fuelTypeCounts = availableExemplars.stream().collect(Collectors.groupingBy(vehicle -> vehicle.getVehicle().getFuelType(), Collectors.counting()));
