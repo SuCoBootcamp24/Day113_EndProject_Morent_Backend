@@ -155,7 +155,7 @@ public class MailService {
             message.setContent(htmlContent, "text/html; charset=utf-8");
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            System.out.println("ERROR----------------->"+ e.getMessage());
         }
     }
 

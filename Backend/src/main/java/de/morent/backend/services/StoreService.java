@@ -50,6 +50,7 @@ public class StoreService {
         newAddress.setCountry(VowelConverter.convertString(dto.country()));
         newAddress.setCoordinates(geocodingService.convertAddressToCoordinates(newAddress));
 
+        if(newAddress.getCoordinates().length() < 2) throw new IllegalArgumentException("it's not a real address");
         newStore.setAddress(newAddress);
 
         User newManager = userService.findUserById(dto.managerId()).orElseThrow(() -> new NoSuchElementException("User was not found"));
