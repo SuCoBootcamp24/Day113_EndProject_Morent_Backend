@@ -26,5 +26,5 @@ public class Profile {
     private String phoneNumber;
 
     @OneToOne(cascade = {CascadeType.ALL})
-    private Image image;
+    private Image image = new Image();
 }

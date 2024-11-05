@@ -18,15 +18,13 @@ public class Store {
     @Column(unique = true)
     private String name;
 
-    @NotBlank
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<VehicleExemplar> vehicleExemplars = new ArrayList<>();
 
-    @NotBlank
-    @OneToOne
+    @ManyToOne
     private User manager;
 
 }

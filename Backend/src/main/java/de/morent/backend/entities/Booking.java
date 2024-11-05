@@ -3,10 +3,13 @@ package de.morent.backend.entities;
 import de.morent.backend.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Data
@@ -26,7 +29,7 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
-    private VehicleExemplar vehicleId;
+    private VehicleExemplar vehicle;
 
     @Column
     private LocalDate pickUpDate;
@@ -42,6 +45,10 @@ public class Booking {
 
     @Column
     private BigDecimal totalPrice;
+
+    @Column
+    @ColumnDefault("false")
+    private Boolean dropOffDifferentStoreExtraCharge;
 
     @Column
     private boolean isActive;
@@ -67,5 +74,9 @@ public class Booking {
     @PreUpdate
     public void onUpdate(){
         this.updated = LocalDateTime.now();
+    }
+
+    public int getTotalDays() {
+        return (int) ChronoUnit.DAYS.between(pickUpDate, plannedDropOffDate);
     }
 }

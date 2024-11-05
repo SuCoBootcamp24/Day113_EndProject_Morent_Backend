@@ -7,6 +7,7 @@ import de.morent.backend.entities.User;
 import de.morent.backend.exceptions.UserAlreadyExistsException;
 
 import de.morent.backend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,9 +26,10 @@ public class AuthController {
 
     //POST / signUp
     @PostMapping("/signUp")
-    public ResponseEntity<User> newRegistrationUser(@RequestBody SignUpRequestDto dto) {
+    public ResponseEntity<Void> newRegistrationUser(@RequestBody @Valid SignUpRequestDto dto) {
         try {
-            return ResponseEntity.ok(userService.newRegistrationUser(dto));
+            userService.newRegistrationUser(dto);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

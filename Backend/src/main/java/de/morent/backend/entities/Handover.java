@@ -1,11 +1,13 @@
 package de.morent.backend.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Data
 public class Handover {
 
     @Id

@@ -29,6 +29,8 @@ public class Address {
 
     private String coordinates;
 
+    private boolean isRealUserAddress = false;
+
 
 
 }
