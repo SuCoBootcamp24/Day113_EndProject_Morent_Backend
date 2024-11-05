@@ -5,6 +5,7 @@ import de.morent.backend.entities.Vehicle;
 import java.util.List;
 
 public record FavoritesResponseDto(
-        List<Vehicle> vehicleList
+        long userId,
+        List<FavoriteDto> vehicleList
 ) {
 }
