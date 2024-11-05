@@ -69,7 +69,7 @@ public class VehicleController {
 
     //GET / Get all Vehicle-Exemplar / Get all Vehicle-Exemplar in one Store
     @PostMapping("/exemplars")
-    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(@RequestBody FilteringDto dto,) {
+    public ResponseEntity<List<VehicleExemplarDto>> getAllVehicleExemplarInStore(@RequestBody FilteringDto dto) {
         return ResponseEntity.ok(vehicleService.getFilteredCars(dto));
     }
 
