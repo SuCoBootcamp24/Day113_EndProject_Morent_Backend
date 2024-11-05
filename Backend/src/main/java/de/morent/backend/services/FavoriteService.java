@@ -1,5 +1,6 @@
 package de.morent.backend.services;
 
+import de.morent.backend.dtos.favorite.FavoriteDto;
 import de.morent.backend.dtos.favorite.FavoritesResponseDto;
 import de.morent.backend.entities.Favorite;
 import de.morent.backend.entities.User;
@@ -12,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -32,26 +35,21 @@ public class FavoriteService {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()->new EntityNotFoundException("User not found"));
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(()->new EntityNotFoundException("Vehicle not found"));
 
-        Optional<Favorite> favoriteList = favoriteRepository.findById(user.getId());
+       Optional<Favorite> existingFavorite = favoriteRepository.findByUserIdAndVehicleId(user.getId(), vehicle.getId());
 
-        Favorite favorite;
-        if(favoriteList.isEmpty()){
-            favorite = new Favorite();
-            favorite.setUser(user);
-            favorite.setVehicle(new ArrayList<>());
-        }else{
-            favorite = favoriteList.get();
-        }
-
-        if(!favorite.getVehicle().contains(vehicle)){
-            favorite.getVehicle().add(vehicle);
-        }else{
-            favorite.getVehicle().remove(vehicle);
-        }
+       if(existingFavorite.isPresent()) {
+           favoriteRepository.delete(existingFavorite.get());
+       }else{
+           Favorite favorite = new Favorite(user, vehicle);
         favoriteRepository.save(favorite);
+        }
     }
-//
-//    public FavoritesResponseDto getAllFavoritesFromUser(Authentication authentication){
-//
-//    }
+
+    public FavoritesResponseDto getAllFavoritesFromUser(Authentication authentication){
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()->new EntityNotFoundException("User not found"));
+        List<Favorite> favoriteList = favoriteRepository.findAllByUserId(user.getId()).orElseThrow(()-> new NoSuchElementException("User has not a favorites"));
+        List<FavoriteDto> favoriteDtoList = favoriteList.stream().map(favorite ->
+                new FavoriteDto(favorite.getId())).toList();
+        return new FavoritesResponseDto(user.getId(), favoriteDtoList);
+    }
 }
