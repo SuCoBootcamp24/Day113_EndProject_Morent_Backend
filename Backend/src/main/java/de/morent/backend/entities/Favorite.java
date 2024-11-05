@@ -17,7 +17,15 @@ public class Favorite {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany
-    @JoinColumn(name ="favorite_id")
-    private List<Vehicle> vehicle;
+    @ManyToOne
+    private Vehicle vehicle;
+
+
+    public Favorite() {
+    }
+
+    public Favorite(User user, Vehicle vehicle) {
+        this.user = user;
+        this.vehicle = vehicle;
+    }
 }
