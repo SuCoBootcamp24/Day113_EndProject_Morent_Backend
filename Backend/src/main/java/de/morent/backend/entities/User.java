@@ -34,7 +34,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    private boolean accountNonLocked = true;
+    private boolean accountNonLocked = false;
 
     @CreationTimestamp
     private LocalDateTime created;

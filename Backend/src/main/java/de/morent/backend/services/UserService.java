@@ -85,7 +85,7 @@ public class UserService {
         user.setRole(UserRole.USER);
         user.setProfile(profile);
         userRepository.save(user);
-        verifyService.sendVerifyMail(user.getEmail());
+        //verifyService.sendVerifyMail(user.getEmail());
     }
 
     private Address CreateEmptyAddress() {
@@ -179,5 +179,11 @@ public class UserService {
     public UserDetailsDTO getUserDetails(Authentication auth) {
         User user = findUserByEmail(auth.getName());
         return UserMapper.toUserDetailsDTO(user);
+    }
+
+    public void setUserRole(long userid, String role) {
+        User user = userRepository.findById(userid).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setRole(UserRole.valueOf(role));
+        userRepository.save(user);
     }
 }

@@ -34,7 +34,7 @@ public class ImagesController {
 
     //POST /vehicle Create/update Vehicle images
     @PostMapping(value = "/vehicle", consumes = "multipart/form-data")
-    public ResponseEntity<Void> createVehicleImages(@RequestPart("file") MultipartFile file, @RequestPart("vehicleId") long vehicleId) {
+    public ResponseEntity<Void> createVehicleImages(@RequestParam("file") MultipartFile file, @RequestParam("vehicleId") long vehicleId) {
        vehicleService.setNewImageToVehicle(vehicleId, file);
         return ResponseEntity.ok().build();
     }
