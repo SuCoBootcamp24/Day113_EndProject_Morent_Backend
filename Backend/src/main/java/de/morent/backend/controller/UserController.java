@@ -45,7 +45,6 @@ public class UserController {
         else return ResponseEntity.badRequest().build();
         //JWT must be deleted in the frontend!!
     }
-
-
+    
 
 }

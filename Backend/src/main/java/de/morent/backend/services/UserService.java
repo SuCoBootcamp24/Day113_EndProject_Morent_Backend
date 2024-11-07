@@ -85,7 +85,7 @@ public class UserService {
         user.setRole(UserRole.USER);
         user.setProfile(profile);
         userRepository.save(user);
-        verifyService.sendVerifyMail(user.getEmail());
+        //verifyService.sendVerifyMail(user.getEmail());
     }
 
     private Address CreateEmptyAddress() {
