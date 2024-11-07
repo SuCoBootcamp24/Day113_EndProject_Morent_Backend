@@ -46,4 +46,10 @@ public class UserController {
         //JWT must be deleted in the frontend!!
     }
 
+    @PostMapping("xyz")
+    public ResponseEntity<Void> someMethod(@RequestBody long userid, String role ) {
+        userService.setUserRole(userid, role);
+        return ResponseEntity.ok().build();
+    }
+
 }

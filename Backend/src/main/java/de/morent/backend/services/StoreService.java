@@ -68,16 +68,15 @@ public class StoreService {
         List<Store> stores;
         stores = findStoreByCity(city);
 
-        if (!stores.isEmpty()) return storeMapper.toListStoreShort(stores);
-        return getFirstFiveStoresInRange(city);
+        if (!stores.isEmpty() && stores.size() > 5) return storeMapper.toListStoreShort(stores);
+        return getFirstFiveStoresInRange(city, storeMapper.toListStoreShort(stores));
     }
 
-    private List<StoreShortDTO> getFirstFiveStoresInRange(String city) {
-        List<Store> stores;
+    private List<StoreShortDTO> getFirstFiveStoresInRange(String city, List<StoreShortDTO> storelistDTO) {
         String searchLocation = geocodingService.getCoordinates(city);
-        stores = findAllStores();
+        List<Store>  stores = findAllStores();
         if (stores.isEmpty()) return List.of();
-        return stores.stream()
+        storelistDTO.addAll(stores.stream()
                 .map(store -> {
                     double distance = Math.round(geocodingService.calcDistance(
                             city,
@@ -96,7 +95,8 @@ public class StoreService {
                 .filter(store -> store.distance() < 50.0)
                 .sorted(Comparator.comparingDouble(StoreShortDTO::distance))
                 .limit(5)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        return storelistDTO;
     }
 
     private List<Store> findAllStores() {
