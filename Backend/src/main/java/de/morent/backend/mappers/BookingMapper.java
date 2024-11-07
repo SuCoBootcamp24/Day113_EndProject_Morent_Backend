@@ -70,6 +70,7 @@ public class BookingMapper {
         return new BookingShortResponseDto(
                 booking.getId(),
                 booking.getVehicle().getId(),
+                booking.getVehicle().getVehicle().getImage().getImageUrl(),
                 booking.getBookingNumber(),
                 booking.getUser().getProfile().getFirstName(),
                 booking.getUser().getProfile().getLastName(),
