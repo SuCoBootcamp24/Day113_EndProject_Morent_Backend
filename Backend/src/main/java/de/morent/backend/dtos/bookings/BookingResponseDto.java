@@ -23,6 +23,7 @@ public record BookingResponseDto(
         int totalDays,
         BigDecimal totalPrice,
         boolean dropOffDifferentStoreExtraCharge,
-        BookingStatus status
+        BookingStatus status,
+        String imageUrl
 ) {
 }

@@ -60,7 +60,8 @@ public class BookingMapper {
                 newBooking.getTotalDays(),
                 newBooking.getTotalPrice(),
                 newBooking.getDropOffDifferentStoreExtraCharge(),
-                newBooking.getStatus()
+                newBooking.getStatus(),
+                newBooking.getVehicle().getVehicle().getImage().getImageUrl()
         );
 
     }
