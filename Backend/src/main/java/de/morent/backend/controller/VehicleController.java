@@ -9,6 +9,7 @@ import de.morent.backend.dtos.vehicle.VehicleExemplarVehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
 import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,21 +29,23 @@ public class VehicleController {
 
     //POST / Create vehicle
     @PostMapping
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> createVehicle(@RequestBody VehicleRequestDTO dto) {
         if (vehicleService.createVehicle(dto)) return ResponseEntity.ok().build();
         else return ResponseEntity.badRequest().build();
     }
 
-    //POST / create more vehicle
-    @PostMapping("/more")
-    public ResponseEntity<Void> createMoreVehicles(@RequestBody VehicleRequestDTO[] dtos) {
-        if (vehicleService.createMoreVehicles(dtos)) return ResponseEntity.ok().build();
-        else return ResponseEntity.badRequest().build();
-    }
+//    //POST / create more vehicle
+//    @PostMapping("/more")
+//    public ResponseEntity<Void> createMoreVehicles(@RequestBody VehicleRequestDTO[] dtos) {
+//        if (vehicleService.createMoreVehicles(dtos)) return ResponseEntity.ok().build();
+//        else return ResponseEntity.badRequest().build();
+//    }
 
 
     //GET / Get all vehicles (PAGES)
     @GetMapping("all")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<List<VehicleDTO>> getAllVehicles(@RequestParam int pageNo, @RequestParam (defaultValue = "10" ) int recordCount) {
         return ResponseEntity.ok(vehicleService.getAllVehicles(pageNo, recordCount));
     }
@@ -55,12 +58,14 @@ public class VehicleController {
 
     //PUT / Update a specific vehicle
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<VehicleDTO> updateVehicle(@PathVariable long id, @RequestBody VehicleRequestDTO dto) {
         return ResponseEntity.ok(vehicleService.updateVehicle(id, dto));
     }
 
     //DELETE /{id} Delete a specific vehicle
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> deleteVehicle(@PathVariable long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();
@@ -82,19 +87,21 @@ public class VehicleController {
 
     //POST / Create Vehicle-Exemplar (auto generate)
     @PostMapping("/exemplar")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<VehicleExemplarDto>> createVehicleExemplar(@RequestParam long vehicleId, @RequestParam long storeId, @RequestParam int quantity, @RequestParam BigDecimal price) {
         return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, storeId, quantity, price));
     }
 
-    @PostMapping("/exemplar/more")
-    public ResponseEntity<List<List<VehicleExemplarDto>>> createMoreVehicleExemplar(@RequestBody VehicleExemplarVehicleDTO dto) {
-        return ResponseEntity.ok(vehicleService.createMoreVehicleExemplar(dto));
-    }
+//    @PostMapping("/exemplar/more")
+//    public ResponseEntity<List<List<VehicleExemplarDto>>> createMoreVehicleExemplar(@RequestBody VehicleExemplarVehicleDTO dto) {
+//        return ResponseEntity.ok(vehicleService.createMoreVehicleExemplar(dto));
+//    }
 
     //UPDATE
 
     //DELETE
     @DeleteMapping("/exemplar/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> deleteVehicleExemplar(@PathVariable long id) {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();

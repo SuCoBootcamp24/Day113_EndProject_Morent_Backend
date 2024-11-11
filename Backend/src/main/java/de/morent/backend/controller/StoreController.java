@@ -5,6 +5,7 @@ import de.morent.backend.services.StoreService;
 import de.morent.backend.dtos.store.StoreRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class StoreController {
 
     //POST / create a new store
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<Void> createNewStore(@RequestBody @Valid StoreRequestDTO dto) {
         if (storeService.createNewStore(dto)) return ResponseEntity.ok().build();
         else return ResponseEntity.badRequest().build();
@@ -38,6 +40,7 @@ public class StoreController {
 
     //GET / Get all stores
     @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<List<StoreShortDTO>> getAllStores() {
         return ResponseEntity.ok(storeService.getAllStores());
     }

@@ -7,6 +7,7 @@ import de.morent.backend.dtos.bookings.BookingShortResponseDto;
 import de.morent.backend.exceptions.IllegalBookingException;
 import de.morent.backend.services.BookingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,12 +56,14 @@ public class BookingController {
 
     // GET ALL BOOKING / EVEN JUST FROM A STORE - ADMIN
     @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<List<BookingShortResponseDto>> getAllBookings(@RequestParam (required = false) long storeId, @RequestParam int pageNo, @RequestParam int recordSize) {
         return ResponseEntity.ok(bookingService.getAllBookings(storeId, pageNo, recordSize));
     }
 
     //GET ALL BOOKINGS BY BOOKING NUMBER, FIRSTNAME AND LASTNAME
     @GetMapping("/admin/search")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_MANAGER', 'SCOPE_ACCOUNTANT')")
     public ResponseEntity<List<BookingShortResponseDto>> getBookingsBySearchCriteria(
             @RequestParam (required = false) String bookingNumber,
             @RequestParam (required = false) String firstName,
@@ -72,6 +75,7 @@ public class BookingController {
 
     // GET ONE BOOKING BY ID - ADMIN
     @GetMapping("/admin/{bookingId}")
+    @PreAuthorize("hasAuthority('SCOPE_MANAGER')")
     public ResponseEntity<BookingShortResponseDto> getBookingById(@PathVariable Long bookingId) {
         return ResponseEntity.ok(bookingService.getShortBookingById(bookingId));
     }
