@@ -77,6 +77,7 @@ public class StoreService {
         List<Store>  stores = findAllStores();
         if (stores.isEmpty()) return List.of();
         storelistDTO.addAll(stores.stream()
+                .filter(store -> !store.getAddress().getCity().equals(searchLocation))
                 .map(store -> {
                     double distance = Math.round(geocodingService.calcDistance(
                             city,

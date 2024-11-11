@@ -9,6 +9,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity(debug = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private RsaKeyProperties rsaKeys;
@@ -52,9 +54,9 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/admin/**", "/api/v1/**").permitAll()   // Ohne login erlaubte seiten
-                        //.requestMatchers("*").hasAuthority("SCOPE_XY")  // Nur mit XY rechte erlaubte seiten
-                        //.anyRequest().hasAnyAuthority("SCOPE_X", "SCOPE_Y") // nur mit autorisierung erreichbar
+                        .requestMatchers("/api/v1/news/", "/api/v1/store/geosearch", "/api/v1/vehicles/exemplars", "/api/v1/vehicles/count", "/api/v1/auth/*").permitAll()
+                        .requestMatchers("/api/v1/store/all","/api/v1/handover/**").hasAnyAuthority("SCOPE_MANAGER", "SCOPE_ADMIN", "SCOPE_ACCOUNTANT")
+                        .anyRequest().authenticated()
                         )
                 .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

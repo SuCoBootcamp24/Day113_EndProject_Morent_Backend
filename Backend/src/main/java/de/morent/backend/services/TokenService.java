@@ -30,7 +30,7 @@ public class TokenService {
                 .issuedAt(now)
                 .expiresAt(now.plus(1, ChronoUnit.HOURS))
                 .subject(auth.getName())
-                .claim("scope", scope)
+                .claim("scope", scope.toUpperCase())
                 .claim("firstname", firstname)
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

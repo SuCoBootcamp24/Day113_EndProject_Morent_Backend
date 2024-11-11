@@ -3,6 +3,7 @@ package de.morent.backend.controller;
 import de.morent.backend.services.NewsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,7 +39,9 @@ public class NewsController {
         return ResponseEntity.ok().build();
     }
 
+
     @PostMapping("/startmail")
+    @PreAuthorize("hasAuthority('SCOPE_MANAGER')")
     public ResponseEntity<Void> sendNewsletter(@RequestParam String email) {
         // Implement sending newsletter to the given email address
         return ResponseEntity.ok().build();
