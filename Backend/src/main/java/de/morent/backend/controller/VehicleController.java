@@ -5,6 +5,7 @@ import de.morent.backend.dtos.search.AutoCountRequestDto;
 import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
+import de.morent.backend.dtos.vehicle.VehicleExemplarVehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
 import de.morent.backend.services.VehicleService;
 import org.springframework.http.ResponseEntity;
@@ -83,6 +84,11 @@ public class VehicleController {
     @PostMapping("/exemplar")
     public ResponseEntity<List<VehicleExemplarDto>> createVehicleExemplar(@RequestParam long vehicleId, @RequestParam long storeId, @RequestParam int quantity, @RequestParam BigDecimal price) {
         return ResponseEntity.ok(vehicleService.createVehicleExemplar(vehicleId, storeId, quantity, price));
+    }
+
+    @PostMapping("/exemplar/more")
+    public ResponseEntity<List<List<VehicleExemplarDto>>> createMoreVehicleExemplar(@RequestBody VehicleExemplarVehicleDTO dto) {
+        return ResponseEntity.ok(vehicleService.createMoreVehicleExemplar(dto));
     }
 
     //UPDATE
