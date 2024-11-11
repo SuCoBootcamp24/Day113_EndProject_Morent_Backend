@@ -25,8 +25,6 @@ public record VehicleRequestDTO(
         @NotBlank
         FuelType fuelType,
         @DecimalMin("0.1")
-        float consumption,
-        //optional
-        MultipartFile img
+        float consumption
 ) {
 }

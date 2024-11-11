@@ -6,6 +6,7 @@ import de.morent.backend.dtos.search.EnumDto;
 import de.morent.backend.dtos.search.FilteringDto;
 import de.morent.backend.dtos.vehicle.VehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleExemplarDto;
+import de.morent.backend.dtos.vehicle.VehicleExemplarVehicleDTO;
 import de.morent.backend.dtos.vehicle.VehicleRequestDTO;
 import de.morent.backend.entities.*;
 import de.morent.backend.enums.CarType;
@@ -25,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -69,9 +67,6 @@ public class VehicleService {
         newVehicle.setAutomatic(dto.isAutomatic());
         newVehicle.setConsumption(dto.consumption());
 
-        if (dto.img() !=null) {
-            newVehicle.setImage(imagesService.setImageToVehicle(newVehicle, dto.img()));
-        }
         vehicleRepository.save(newVehicle);
         return true;
     }
@@ -117,9 +112,7 @@ public class VehicleService {
         vehicle.setEngineCapacity(dto.engineCapacity());
         vehicle.setAutomatic(dto.isAutomatic());
         vehicle.setConsumption(dto.consumption());
-        if (dto.img()!=null) {
-            vehicle.setImage(imagesService.setImageToVehicle(vehicle, dto.img()));
-        }
+
         vehicleRepository.save(vehicle);
         return VehicleMapper.mapToDto(vehicle);
     }
@@ -146,6 +139,14 @@ public class VehicleService {
             vehicleExemplarRepository.save(vehicleExemplar);
         }
         return exemplars.stream().map(VehicleExemplarMapper::mapToDto).toList();
+    }
+
+    public List<List<VehicleExemplarDto>> createMoreVehicleExemplar(VehicleExemplarVehicleDTO dto) {
+        List<List<VehicleExemplarDto>> exemplars = new ArrayList<>();
+        for(long storeId : dto.storeIds()) {
+            exemplars.add(createVehicleExemplar(dto.vehicleId(), storeId, dto.quantity(), dto.price()));
+        }
+        return exemplars;
     }
 
     public List<VehicleExemplarDto> getFilteredCars(FilteringDto dto) {
@@ -176,6 +177,7 @@ public class VehicleService {
                 .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
                 .values().stream()
                 .map(List::getFirst)
+                .sorted(Comparator.comparing(VehicleExemplar::getPricePerDay))
                 .map(VehicleExemplarMapper::mapToDto).toList();
     }
 
@@ -192,7 +194,11 @@ public class VehicleService {
         long storeId = dto.storeId();
 
         // Retrieve a list of available vehicle exemplars for the specified store ID and filter them by availability within the given date range.
-        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream().filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), dto.startDate(), dto.endDate())).toList();
+        List<VehicleExemplar> availableExemplars = vehicleExemplarRepository.findByStoreId(storeId).stream()
+                .filter(vehicle -> bookingService.autoIsAvailable(vehicle.getId(), dto.startDate(), dto.endDate()))
+                .collect(Collectors.groupingBy(VehicleExemplar::getVehicle))
+                .values().stream()
+                .map(List::getFirst).toList();
 
         // Count the number of vehicle exemplars by fuel type and car type, storing the results in separate maps.
         Map<FuelType, Long> fuelTypeCounts = availableExemplars.stream().collect(Collectors.groupingBy(vehicle -> vehicle.getVehicle().getFuelType(), Collectors.counting()));
@@ -228,4 +234,5 @@ public class VehicleService {
     public VehicleExemplar findExemplarById(long exemplarId) {
         return vehicleExemplarRepository.findById(exemplarId).orElseThrow(() -> new EntityNotFoundException("VehicleExemplar not found"));
     }
+
 }
