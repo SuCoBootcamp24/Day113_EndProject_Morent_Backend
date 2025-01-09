@@ -48,6 +48,12 @@ Das Morent Backend ist ein RESTful API-Service auf Basis von **Spring Boot** und
 - **Imgbb** für Bild-Upload (externer Dienst)
 - **Mailtrap** für das testen der e-mail Versendung (externer Dienst)
 
+## 🎥 Projektpräsentation
+Wir haben hier ein kleines Demovideo erstellt, um zu zeigen wie unser Projekt mit inkl. den Features aussieht.
+die Fahrzeug bilder sind Muster und können mit Adminrechte aktualisiert werden.
+
+[![Videotitel](https://img.youtube.com/vi/sj8I2FK4zo4/0.jpg)](https://www.youtube.com/watch?v=sj8I2FK4zo4)
+
 ## 👥 Team
 Das Team bestand aus 3 Personen:
 
